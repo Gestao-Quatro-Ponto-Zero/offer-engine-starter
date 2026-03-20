@@ -1,0 +1,84 @@
+{
+  "$schema": "https://developers.hubspot.com/schemas/app.json",
+  "name": "G4 Offers",
+  "description": "Sistema inteligente de oferta de condições de pagamento risk-based para vendedores G4",
+  "uid": "g4-offers",
+  "scopes": [
+    "crm.objects.deals.read",
+    "crm.objects.deals.write",
+    "crm.objects.contacts.read",
+    "crm.objects.companies.read",
+    "crm.schemas.deals.read",
+    "crm.schemas.deals.write"
+  ],
+  "webhooks": {
+    "targetUrl": "${G4_OFFERS_API_URL}/v1/webhooks/hubspot/deal-update",
+    "subscriptions": [
+      {
+        "subscriptionType": "deal.propertyChange",
+        "propertyName": "dealstage",
+        "active": true
+      },
+      {
+        "subscriptionType": "deal.propertyChange",
+        "propertyName": "amount",
+        "active": true
+      },
+      {
+        "subscriptionType": "deal.creation",
+        "active": true
+      }
+    ]
+  },
+  "extensions": {
+    "crm": {
+      "cards": [
+        {
+          "title": "G4 Offers",
+          "uid": "g4-offers-card",
+          "fetch": {
+            "targetUrl": "${G4_OFFERS_API_URL}/v1/hubspot/card/{hs_object_id}",
+            "objectTypes": [
+              {
+                "name": "deals",
+                "propertiesToSend": [
+                  "dealname",
+                  "amount",
+                  "dealstage",
+                  "pipeline",
+                  "g4_risk_score",
+                  "g4_risk_grade",
+                  "g4_offer_status"
+                ]
+              }
+            ]
+          },
+          "display": {
+            "properties": [
+              {
+                "name": "g4_risk_score",
+                "label": "Score",
+                "dataType": "NUMERIC"
+              },
+              {
+                "name": "g4_risk_grade",
+                "label": "Faixa",
+                "dataType": "STRING"
+              },
+              {
+                "name": "g4_offer_status",
+                "label": "Status",
+                "dataType": "STATUS"
+              }
+            ]
+          },
+          "actions": {
+            "baseUrls": [
+              "${G4_OFFERS_API_URL}"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

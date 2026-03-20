@@ -1,0 +1,23 @@
+# G4 Offers — Dependencies
+# Core
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.0
+httpx>=0.28.0
+pyyaml>=6.0
+
+# ML (reuso do G4 Collections model)
+scikit-learn==1.6.1
+numpy>=2.0.0
+pandas>=2.2.0
+joblib>=1.4.0
+shap>=0.46.0
+
+# GCP
+google-cloud-firestore>=2.19.0
+
+# Redis (cache de bureau)
+redis>=5.2.0
+
+# Utils
+python-multipart>=0.0.18

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G4 Offer Engine — Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  :root {
+    --bg:#0a0a0f;--s1:#111118;--s2:#1a1a24;--s3:#22222e;--bd:#2a2a3a;--bd2:#1e1e2e;
+    --t1:#f0f0f5;--t2:#a0a0b5;--t3:#6a6a80;
+    --ac:#6366f1;--ac2:rgba(99,102,241,.12);--ac3:rgba(99,102,241,.3);
+    --g:#22c55e;--gb:rgba(34,197,94,.12);
+    --y:#eab308;--yb:rgba(234,179,8,.12);
+    --o:#f97316;--ob:rgba(249,115,22,.12);
+    --r:#ef4444;--rb:rgba(239,68,68,.12);
+    --b:#3b82f6;--bb:rgba(59,130,246,.12);
+    --rad:12px;--rad-s:8px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);line-height:1.5;min-height:100vh}
+
+  /* Header */
+  .hdr{background:var(--s1);border-bottom:1px solid var(--bd);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .hdr h1{font-size:15px;font-weight:700;letter-spacing:-.02em}
+  .hdr h1 span{color:var(--ac)}
+  .hdr-right{display:flex;align-items:center;gap:12px}
+  .hdr-badge{font-size:11px;padding:4px 10px;border-radius:6px;background:var(--ac2);color:var(--ac);font-weight:600}
+  .btn-save{padding:8px 18px;border-radius:var(--rad-s);border:none;background:var(--ac);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+  .btn-save:hover{box-shadow:0 4px 16px var(--ac3)}
+  .btn-save:disabled{opacity:.4;cursor:default}
+  .btn-reset{padding:8px 14px;border-radius:var(--rad-s);border:1px solid var(--bd);background:transparent;color:var(--t3);font-size:12px;cursor:pointer}
+
+  /* Layout */
+  .layout{display:flex;min-height:calc(100vh - 52px)}
+  .sidebar{width:220px;background:var(--s1);border-right:1px solid var(--bd);padding:16px 0;flex-shrink:0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:var(--t3);cursor:pointer;transition:.15s;border-left:3px solid transparent}
+  .nav-item:hover{color:var(--t2);background:var(--s2)}
+  .nav-item.active{color:var(--ac);background:var(--ac2);border-left-color:var(--ac);font-weight:600}
+  .nav-icon{font-size:16px;width:20px;text-align:center}
+  .nav-section{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;padding:20px 20px 6px;margin-top:4px}
+  .main{flex:1;padding:28px 32px;max-width:960px}
+  .page-title{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+  .page-sub{font-size:13px;color:var(--t2);margin-bottom:24px}
+
+  /* Cards */
+  .card{background:var(--s1);border:1px solid var(--bd2);border-radius:var(--rad);padding:24px;margin-bottom:16px}
+  .card-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card-title .dot{width:8px;height:8px;border-radius:50%}
+
+  /* Form */
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:11px;color:var(--t3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .inp{width:100%;padding:8px 12px;border-radius:var(--rad-s);border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:13px;outline:none;transition:.15s}
+  .inp:focus{border-color:var(--ac)}
+  .inp-sm{width:100px}
+  select.inp{appearance:none;cursor:pointer}
+  .row{display:flex;gap:12px;align-items:end}
+  .row .field{flex:1}
+
+  /* Slider */
+  .slider-wrap{position:relative;height:32px;display:flex;align-items:center}
+  .slider-track{position:absolute;width:100%;height:4px;background:var(--s3);border-radius:2px}
+  .slider-fill{position:absolute;height:4px;background:var(--ac);border-radius:2px}
+  .slider-input{position:absolute;width:100%;height:32px;opacity:0;cursor:pointer;z-index:2}
+  .slider-thumb{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid var(--s1);box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none}
+  .slider-val{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+  .slider-val span:last-child{font-weight:700}
+
+  /* Toggle */
+  .tgl-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd2)}
+  .tgl-row:last-child{border:none}
+  .tgl-label{font-size:13px}
+  .tgl-label small{display:block;font-size:11px;color:var(--t3);margin-top:1px}
+  .tgl{position:relative;width:38px;height:20px;cursor:pointer;flex-shrink:0}
+  .tgl input{display:none}
+  .tgl .track{position:absolute;inset:0;background:var(--s3);border-radius:10px;transition:.2s}
+  .tgl .knob{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--t3);top:3px;left:3px;transition:.2s}
+  .tgl input:checked+.track{background:var(--ac)}
+  .tgl input:checked+.track+.knob{transform:translateX(18px);background:#fff}
+
+  /* Grade tabs */
+  .grade-tabs{display:flex;gap:6px;margin-bottom:20px}
+  .grade-tab{padding:8px 16px;border-radius:var(--rad-s);border:2px solid var(--bd);background:transparent;color:var(--t3);font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+  .grade-tab:hover{border-color:var(--t3)}
+  .grade-tab.sel-aplus{border-color:var(--g);background:var(--gb);color:var(--g)}
+  .grade-tab.sel-a{border-color:var(--b);background:var(--bb);color:var(--b)}
+  .grade-tab.sel-b{border-color:var(--y);background:var(--yb);color:var(--y)}
+  .grade-tab.sel-c{border-color:var(--o);background:var(--ob);color:var(--o)}
+  .grade-tab.sel-d{border-color:var(--r);background:var(--rb);color:var(--r)}
+
+  /* Option card */
+  .opt-card{background:var(--s2);border-radius:var(--rad);padding:16px;margin-bottom:10px;border:1px solid var(--bd2)}
+  .opt-card.is-rec{border:2px solid var(--ac);background:linear-gradient(135deg,rgba(99,102,241,.06),transparent)}
+  .opt-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .opt-type-btns{display:flex;gap:4px}
+  .opt-type-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:.15s}
+  .opt-type-btn.active{background:var(--t1);color:var(--bg)}
+  .opt-actions{display:flex;gap:6px}
+  .btn-xs{padding:4px 8px;border-radius:6px;border:1px solid var(--bd);background:transparent;font-size:11px;cursor:pointer;transition:.15s}
+  .btn-xs:hover{border-color:var(--t3)}
+  .btn-xs.danger{border-color:var(--r);color:var(--r)}
+  .btn-xs.rec{border-color:var(--ac);color:var(--ac)}
+  .btn-add{width:100%;padding:10px;border-radius:var(--rad);border:2px dashed var(--bd);background:transparent;color:var(--t3);font-size:12px;cursor:pointer;transition:.15s;margin-top:8px}
+  .btn-add:hover{border-color:var(--ac);color:var(--ac)}
+
+  /* Preview */
+  .preview{background:var(--s1);border-radius:var(--rad-s);padding:12px;border:1px solid var(--bd2);margin-top:10px;font-size:12px}
+  .preview .pv-title{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;font-weight:600}
+  .preview .pv-main{font-size:16px;font-weight:700}
+  .preview .pv-detail{color:var(--t2);margin-top:2px}
+
+  /* Eco table */
+  .eco-grid{display:grid;grid-template-columns:1fr 120px 1fr;gap:8px;align-items:center}
+  .eco-name{font-size:13px;font-weight:600}
+  .eco-inp{width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:14px;font-weight:700;text-align:center;outline:none}
+  .eco-inp:focus{border-color:var(--ac)}
+  .eco-result{font-size:12px;color:var(--t2)}
+
+  /* Overrides */
+  .ovr-card{background:var(--s2);border-radius:var(--rad);padding:16px;margin-bottom:10px;border:1px solid var(--bd2)}
+  .ovr-title{font-size:13px;font-weight:700;margin-bottom:8px}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:var(--rad-s);background:var(--g);color:#fff;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(12px);transition:.3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateY(0)}
+
+  /* Responsive */
+  @media(max-width:800px){.sidebar{display:none}.main{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1><span>G4</span> Offer Engine — Admin</h1>
+  <div class="hdr-right">
+    <span class="hdr-badge" id="policyBadge">Politica Mar/2026</span>
+    <button class="btn-reset" onclick="resetAll()">Reset Default</button>
+    <button class="btn-save" id="btnSave" onclick="saveAll()">Salvar Alteracoes</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-section">Politica Comercial</div>
+    <div class="nav-item" data-page="policy" onclick="showPage('policy')"><span class="nav-icon">&#128203;</span> Politica Vigente</div>
+    <div class="nav-section">Motor de Regras</div>
+    <div class="nav-item active" data-page="rules" onclick="showPage('rules')"><span class="nav-icon">&#9881;</span> Regras por Faixa</div>
+    <div class="nav-item" data-page="eco" onclick="showPage('eco')"><span class="nav-icon">&#127760;</span> Descontos Ecossistema</div>
+    <div class="nav-item" data-page="overrides" onclick="showPage('overrides')"><span class="nav-icon">&#9889;</span> Overrides</div>
+    <div class="nav-item" data-page="smartexit" onclick="showPage('smartexit')"><span class="nav-icon">&#128161;</span> Saida Inteligente</div>
+    <div class="nav-item" data-page="catalog" onclick="showPage('catalog')"><span class="nav-icon">&#128722;</span> Catalogo de Produtos</div>
+    <div class="nav-section">Configuracoes</div>
+    <div class="nav-item" data-page="scoring" onclick="showPage('scoring')"><span class="nav-icon">&#127919;</span> Pesos do Score</div>
+    <div class="nav-item" data-page="bus" onclick="showPage('bus')"><span class="nav-icon">&#127970;</span> Business Units</div>
+    <div class="nav-item" data-page="general" onclick="showPage('general')"><span class="nav-icon">&#128736;</span> Geral</div>
+    <div class="nav-section">Ferramentas</div>
+    <div class="nav-item" data-page="simulator" onclick="showPage('simulator')"><span class="nav-icon">&#128202;</span> Simulador</div>
+    <div class="nav-item" data-page="export" onclick="showPage('export')"><span class="nav-icon">&#128230;</span> Exportar / Importar</div>
+  </div>
+
+  <div class="main" id="mainContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================================
+// STATE
+// =====================================================================
+const STORAGE_KEY = 'g4_offer_engine_config';
+
+const DEFAULT_CONFIG = {
+  rules: {
+    'A+': {
+      name: 'A+ Premium', score_min: 850, score_max: 1000,
+      credit_limit: 500000, requires_promissory: false,
+      manager_above: null, director_above: null,
+      options: [
+        { type:'installment', max_installments:12, down_pct:0, rate:0, recommended:true },
+        { type:'pix', discount:10, recommended:false },
+        { type:'boleto', down_pct:50, discount:0, recommended:false },
+      ]
+    },
+    'A': {
+      name: 'A Bom', score_min: 700, score_max: 849,
+      credit_limit: 350000, requires_promissory: false,
+      manager_above: 200000, director_above: null,
+      options: [
+        { type:'installment', max_installments:10, down_pct:10, rate:0, recommended:true },
+        { type:'installment', max_installments:12, down_pct:20, rate:1.5, recommended:false },
+        { type:'pix', discount:8, recommended:false },
+      ]
+    },
+    'B': {
+      name: 'B Moderado', score_min: 500, score_max: 699,
+      credit_limit: 200000, requires_promissory: true,
+      manager_above: 100000, director_above: null,
+      options: [
+        { type:'installment', max_installments:8, down_pct:20, rate:0, recommended:true },
+        { type:'installment', max_installments:10, down_pct:30, rate:2, recommended:false },
+        { type:'pix', discount:5, recommended:false },
+      ]
+    },
+    'C': {
+      name: 'C Restrito', score_min: 300, score_max: 499,
+      credit_limit: 100000, requires_promissory: true,
+      manager_above: 0, director_above: 200000,
+      options: [
+        { type:'installment', max_installments:6, down_pct:40, rate:0, recommended:true },
+        { type:'structured', max_installments:6, down_pct:40, deferred_days:60, recommended:false },
+        { type:'pix', discount:3, recommended:false },
+      ]
+    },
+    'D': {
+      name: 'D Alto Risco', score_min: 0, score_max: 299,
+      credit_limit: 50000, requires_promissory: true,
+      manager_above: 0, director_above: 0,
+      options: [
+        { type:'pix', discount:3, recommended:true },
+        { type:'installment', max_installments:3, down_pct:50, rate:0, recommended:false },
+        { type:'structured', max_installments:3, down_pct:60, deferred_days:60, recommended:false },
+      ]
+    }
+  },
+  ecosystem: {
+    club: { name:'Club', discount:30 },
+    scale: { name:'Scale', discount:15 },
+    tools: { name:'Tools', discount:30 },
+    tools_fee: { name:'Tools + Fee', discount:40 },
+    mentores: { name:'Mentores', discount:30 },
+  },
+  ecosystem_cap: 40,
+  ecosystem_cap_absolute: 80000, // Max R$80k independente do %
+  overrides: {
+    recompra: { enabled:true, extra_installments:2, label:'Recompra (historico excelente)' },
+    campanha: { enabled:true, extra_installments:3, down_reduction:10, label:'Campanha Ativa' },
+    field_sales: { enabled:true, extra_installments:2, label:'Field Sales (presencial)' },
+  },
+  scoring: { ml_weight:50, bureau_weight:30, behavioral_weight:20 },
+  bus: ['Scale','Club','Valley','G4peloBrasil','Poker','Jantar','Class','Skills','GE'],
+  smart_exit: {
+    enabled: true,
+    suggest_split: true,
+    suggest_min_down: true,
+    suggest_structured: true,
+    split_threshold: 1.5, // ratio deal/limit para sugerir split
+    max_split_contracts: 3,
+  },
+  general: { max_installments:12, default_validity_days:7, require_contract:true },
+  catalog: [
+    { id:'ge', name:'G4 Gestao e Estrategia', price:35120, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'traction', name:'G4 Traction', price:17900, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'advisor', name:'G4 Advisor', price:24900, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'flg', name:'G4 Founder Led Growth', price:16900, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'sales', name:'G4 Sales', price:9900, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'gp', name:'G4 Gestao de Pessoas', price:9900, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'mktgrowth', name:'G4 Marketing e Growth', price:8900, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'formia', name:'G4 Formacao em IA', price:8000, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'aiacademy', name:'G4 AI Academy', price:4543, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'acadvendas', name:'G4 Academia de Vendedores', price:3997, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'acadlider', name:'G4 Academia de Lideranca', price:4500, bu:'Imersões', category:'Imersoes', active:true },
+    { id:'sprint-pe', name:'G4 Sprints - Planejamento Estrategico', price:41500, bu:'Sprints', category:'Sprints', active:true },
+    { id:'sprint-receita', name:'G4 Sprints - Aumento de Receita', price:29900, bu:'Sprints', category:'Sprints', active:true },
+    { id:'sprint-cultura', name:'G4 Sprints - Cultura', price:30000, bu:'Sprints', category:'Sprints', active:true },
+    { id:'gestaoempresarial', name:'G4 Gestao Empresarial', price:6997, bu:'Sprints', category:'Sprints', active:true },
+    { id:'novaformacao', name:'Nova Formacao G4', price:1997, bu:'Online', category:'Online', active:true },
+    { id:'formvendas', name:'Formacao em Vendas', price:1497, bu:'Online', category:'Online', active:true },
+    { id:'aipratica', name:'G4 AI na Pratica', price:1497, bu:'Skills', category:'Online', active:true },
+    { id:'lideranca', name:'G4 Lideranca e Alta Performance', price:697, bu:'Online', category:'Online', active:true },
+    { id:'mktestrat', name:'Marketing Estrategico', price:1997, bu:'Online', category:'Online', active:true },
+    { id:'novosnegocios', name:'G4 Formacao em Novos Negocios', price:997, bu:'Online', category:'Online', active:true },
+    { id:'financas', name:'G4 Fundamentos em Financas', price:697, bu:'Online', category:'Online', active:true },
+    { id:'scale', name:'G4 Scale', price:50900, bu:'Scale', category:'Membership', active:true },
+    { id:'club', name:'G4 Club', price:210140, bu:'Club', category:'Membership', active:true },
+    { id:'skills-lic', name:'Licencas Skills', price:3997, bu:'Skills', category:'Membership', active:true },
+    { id:'pass-vit', name:'G4 Pass Vitalicio', price:2997, bu:'Skills', category:'Pass & Eventos', active:true },
+    { id:'pass-novo', name:'O Novo G4 Pass', price:2997, bu:'Online', category:'Pass & Eventos', active:true },
+    { id:'valley-presencial', name:'G4 Valley Presencial', price:850, bu:'Valley', category:'Pass & Eventos', active:true },
+    { id:'valley-atlas', name:'G4 Valley Atlas', price:2400, bu:'Valley', category:'Pass & Eventos', active:true },
+    { id:'valley-club', name:'G4 Valley Club Experience', price:6320, bu:'Valley', category:'Pass & Eventos', active:true },
+    { id:'pelobrasil', name:'G4 Pelo Brasil', price:847, bu:'G4peloBrasil', category:'Pass & Eventos', active:true },
+    { id:'pelobrasil-vip', name:'G4 Pelo Brasil VIP', price:1447, bu:'G4peloBrasil', category:'Pass & Eventos', active:true },
+  ],
+};
+
+let config = loadConfig();
+let currentPage = 'rules';
+let currentGrade = 'A+';
+let dirty = false;
+
+const POLICY_STORAGE_KEY = 'g4_offer_engine_policy_versions';
+let policyVersions = loadPolicyVersions();
+let expandedPolicyVersion = -1;
+
+function loadPolicyVersions() {
+  try {
+    const raw = localStorage.getItem(POLICY_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return [];
+}
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+}
+
+function saveAll() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  dirty = false;
+  document.getElementById('btnSave').disabled = true;
+  showToast('Configuracao salva com sucesso!');
+}
+
+function resetAll() {
+  if (!confirm('Resetar todas as configuracoes para o padrao? Isso nao pode ser desfeito.')) return;
+  config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  localStorage.removeItem(STORAGE_KEY);
+  dirty = false;
+  render();
+  showToast('Configuracoes resetadas para o padrao');
+}
+
+function markDirty() {
+  dirty = true;
+  document.getElementById('btnSave').disabled = false;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === page);
+  });
+  render();
+}
+
+function fmt(v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); }
+function pmt(principal, n, ratePct) {
+  if (n <= 0) return principal;
+  if (ratePct <= 0) return principal / n;
+  const r = ratePct / 100;
+  return principal * (r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+}
+
+// =====================================================================
+// RENDER
+// =====================================================================
+function render() {
+  const el = document.getElementById('mainContent');
+  switch(currentPage) {
+    case 'policy': el.innerHTML = renderPolicy(); break;
+    case 'rules': el.innerHTML = renderRules(); break;
+    case 'eco': el.innerHTML = renderEco(); break;
+    case 'overrides': el.innerHTML = renderOverrides(); break;
+    case 'smartexit': el.innerHTML = renderSmartExit(); break;
+    case 'catalog': el.innerHTML = renderCatalog(); break;
+    case 'scoring': el.innerHTML = renderScoring(); break;
+    case 'bus': el.innerHTML = renderBus(); break;
+    case 'general': el.innerHTML = renderGeneral(); break;
+    case 'simulator': el.innerHTML = renderSimulator(); break;
+    case 'export': el.innerHTML = renderExport(); break;
+  }
+  // Update policy badge in header
+  const badge = document.getElementById('policyBadge');
+  if (badge) {
+    badge.textContent = policyVersions.length > 0
+      ? 'Politica ' + policyVersions[0].month + ' (v' + policyVersions[0].version + ')'
+      : 'Sem versao publicada';
+  }
+}
+
+// =====================================================================
+// PAGE: RULES
+// =====================================================================
+function renderRules() {
+  const grades = ['A+','A','B','C','D'];
+  const cls = {'A+':'sel-aplus','A':'sel-a','B':'sel-b','C':'sel-c','D':'sel-d'};
+  const r = config.rules[currentGrade];
+  const previewAmt = 100000;
+
+  let tabs = grades.map(g =>
+    `<button class="grade-tab ${g===currentGrade ? cls[g] : ''}" onclick="currentGrade='${g}';render()">${g}</button>`
+  ).join('');
+
+  let optsHtml = '';
+  r.options.forEach((opt, i) => {
+    const isRec = opt.recommended;
+    const typeLabels = {installment:'Cartao',pix:'Pix',boleto:'Boleto',structured:'Estruturado'};
+
+    let preview = '';
+    if (opt.type === 'pix') {
+      const total = previewAmt * (1 - opt.discount/100);
+      preview = `<div class="preview"><div class="pv-title">Preview (deal R$100k)</div><div class="pv-main" style="color:var(--g)">${fmt(total)}</div><div class="pv-detail">${opt.discount}% de desconto — economia ${fmt(previewAmt - total)}</div></div>`;
+    } else if (opt.type === 'boleto') {
+      const down = previewAmt * (opt.down_pct/100);
+      preview = `<div class="preview"><div class="pv-title">Preview (deal R$100k)</div><div class="pv-main">${fmt(down)} + ${fmt(previewAmt - down)}</div><div class="pv-detail">${opt.down_pct}% entrada + restante pre-evento</div></div>`;
+    } else if (opt.type === 'structured') {
+      const down = previewAmt * (opt.down_pct/100);
+      const fin = previewAmt - down;
+      const inst = pmt(fin, opt.max_installments, 0);
+      const days = opt.deferred_days || 60;
+      preview = `<div class="preview"><div class="pv-title">Preview (deal R$100k)</div><div class="pv-main" style="color:var(--b)">${opt.max_installments}x ${fmt(inst)} — inicio em ${days} dias</div><div class="pv-detail">Caucao ${fmt(down)} (${opt.down_pct}%) + cheque caucao + promissoria digital</div></div>`;
+    } else {
+      const down = previewAmt * (opt.down_pct/100);
+      const fin = previewAmt - down;
+      const inst = pmt(fin, opt.max_installments, opt.rate);
+      const total = down + inst * opt.max_installments;
+      const diff = total - previewAmt;
+      preview = `<div class="preview"><div class="pv-title">Preview (deal R$100k)</div><div class="pv-main">${opt.max_installments}x ${fmt(inst)}</div><div class="pv-detail">${opt.down_pct > 0 ? 'Entrada '+fmt(down)+' ('+opt.down_pct+'%) — ' : ''}Total ${fmt(total)}${diff > 1 ? ' <span style="color:var(--r)">(+'+fmt(diff)+' juros)</span>' : ''}</div></div>`;
+    }
+
+    let fields = '';
+    if (opt.type === 'installment') {
+      fields = `
+        <div class="row">
+          <div class="field"><label>Parcelas Max</label><input class="inp" type="number" min="1" max="12" value="${opt.max_installments}" onchange="updOpt(${i},'max_installments',+this.value)"></div>
+          <div class="field"><label>Entrada %</label><input class="inp" type="number" min="0" max="100" step="5" value="${opt.down_pct}" onchange="updOpt(${i},'down_pct',+this.value)"></div>
+          <div class="field"><label>Juros % a.m.</label><input class="inp" type="number" min="0" max="10" step="0.5" value="${opt.rate}" onchange="updOpt(${i},'rate',+this.value)"></div>
+        </div>`;
+    } else if (opt.type === 'pix') {
+      fields = `<div class="field"><label>Desconto Pix %</label><input class="inp" type="number" min="0" max="30" step="1" value="${opt.discount}" onchange="updOpt(${i},'discount',+this.value)"></div>`;
+    } else if (opt.type === 'structured') {
+      fields = `
+        <div class="row">
+          <div class="field"><label>Parcelas Max</label><input class="inp" type="number" min="1" max="12" value="${opt.max_installments}" onchange="updOpt(${i},'max_installments',+this.value)"></div>
+          <div class="field"><label>Caucao %</label><input class="inp" type="number" min="0" max="100" step="5" value="${opt.down_pct}" onchange="updOpt(${i},'down_pct',+this.value)"></div>
+          <div class="field"><label>Inicio Diferido (dias)</label><input class="inp" type="number" min="30" max="120" step="15" value="${opt.deferred_days||60}" onchange="updOpt(${i},'deferred_days',+this.value)"></div>
+        </div>
+        <div style="font-size:11px;color:var(--b);margin-top:6px;padding:6px 10px;background:var(--bb);border-radius:6px">&#128196; Requer: cheque caucao + promissoria digital + aprovacao obrigatoria</div>`;
+    } else {
+      fields = `
+        <div class="row">
+          <div class="field"><label>Entrada %</label><input class="inp" type="number" min="0" max="100" step="5" value="${opt.down_pct}" onchange="updOpt(${i},'down_pct',+this.value)"></div>
+          <div class="field"><label>Desconto %</label><input class="inp" type="number" min="0" max="20" step="1" value="${opt.discount || 0}" onchange="updOpt(${i},'discount',+this.value)"></div>
+        </div>`;
+    }
+
+    optsHtml += `
+      <div class="opt-card ${isRec?'is-rec':''}">
+        <div class="opt-hdr">
+          <div class="opt-type-btns">
+            ${['installment','pix','boleto','structured'].map(t =>
+              `<button class="opt-type-btn ${opt.type===t?'active':''}" onclick="updOpt(${i},'type','${t}')">${typeLabels[t]}</button>`
+            ).join('')}
+          </div>
+          <div class="opt-actions">
+            <button class="btn-xs rec" onclick="toggleRec(${i})">${isRec?'&#9733; Rec':'Destacar'}</button>
+            <button class="btn-xs danger" onclick="removeOpt(${i})">Remover</button>
+          </div>
+        </div>
+        ${fields}
+        ${preview}
+      </div>`;
+  });
+
+  return `
+    <div class="page-title">Regras por Faixa de Risco</div>
+    <div class="page-sub">Configure condicoes de pagamento para cada faixa. Todas as alteracoes sao salvas ao clicar "Salvar".</div>
+    <div class="grade-tabs">${tabs}</div>
+
+    <div class="card">
+      <div class="card-title"><div class="dot" style="background:var(--${{  'A+':'g','A':'b','B':'y','C':'o','D':'r'}[currentGrade]})"></div> ${r.name} (Score ${r.score_min}-${r.score_max})</div>
+
+      <div class="row">
+        <div class="field"><label>Nome da Faixa</label><input class="inp" value="${r.name}" onchange="config.rules['${currentGrade}'].name=this.value;markDirty();render()"></div>
+        <div class="field"><label>Limite Credito</label><input class="inp" type="number" step="10000" value="${r.credit_limit}" onchange="config.rules['${currentGrade}'].credit_limit=+this.value;markDirty();render()"></div>
+      </div>
+
+      <div class="row" style="margin-bottom:16px">
+        <div class="field"><label>Score Min</label><input class="inp" type="number" min="0" max="1000" value="${r.score_min}" onchange="config.rules['${currentGrade}'].score_min=+this.value;markDirty()"></div>
+        <div class="field"><label>Score Max</label><input class="inp" type="number" min="0" max="1000" value="${r.score_max}" onchange="config.rules['${currentGrade}'].score_max=+this.value;markDirty()"></div>
+      </div>
+
+      <div class="tgl-row">
+        <div class="tgl-label">Nota Promissoria<small>Exigir nota promissoria nesta faixa</small></div>
+        <label class="tgl"><input type="checkbox" ${r.requires_promissory?'checked':''} onchange="config.rules['${currentGrade}'].requires_promissory=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <div class="field"><label>Aprov. Gerente acima de (R$)</label><input class="inp" type="number" step="10000" value="${r.manager_above ?? ''}" placeholder="Nunca" onchange="config.rules['${currentGrade}'].manager_above=this.value?+this.value:null;markDirty()"></div>
+        <div class="field"><label>Aprov. Diretoria acima de (R$)</label><input class="inp" type="number" step="10000" value="${r.director_above ?? ''}" placeholder="Nunca" onchange="config.rules['${currentGrade}'].director_above=this.value?+this.value:null;markDirty()"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Opcoes de Pagamento (${r.options.length}/3)</div>
+      ${optsHtml}
+      ${r.options.length < 3 ? `<button class="btn-add" onclick="addOpt()">+ Adicionar Opcao</button>` : ''}
+    </div>`;
+}
+
+function updOpt(i, key, val) {
+  config.rules[currentGrade].options[i][key] = val;
+  markDirty(); render();
+}
+function toggleRec(i) {
+  config.rules[currentGrade].options.forEach((o,j) => o.recommended = (j === i));
+  markDirty(); render();
+}
+function removeOpt(i) {
+  config.rules[currentGrade].options.splice(i, 1);
+  markDirty(); render();
+}
+function addOpt() {
+  if (config.rules[currentGrade].options.length >= 3) return;
+  config.rules[currentGrade].options.push({ type:'installment', max_installments:6, down_pct:0, rate:0, recommended:false });
+  markDirty(); render();
+}
+
+// =====================================================================
+// PAGE: ECOSYSTEM
+// =====================================================================
+function renderEco() {
+  const eco = config.ecosystem;
+  let rows = '';
+  for (const [key, val] of Object.entries(eco)) {
+    const pixBase = 10;
+    const effective = Math.min(pixBase + val.discount, config.ecosystem_cap);
+    rows += `
+      <div class="eco-name">${val.name}</div>
+      <input class="eco-inp" type="number" min="0" max="50" value="${val.discount}" onchange="config.ecosystem['${key}'].discount=+this.value;markDirty();render()">
+      <div class="eco-result">Pix A+: ${effective}% efetivo (${fmt(100000*(1-effective/100))})</div>`;
+  }
+
+  return `
+    <div class="page-title">Descontos Ecossistema G4</div>
+    <div class="page-sub">Desconto adicional no Pix/a vista para membros do ecossistema G4. Somado ao desconto base da faixa.</div>
+    <div class="card">
+      <div class="card-title">Descontos por Tipo de Membro</div>
+      <div class="eco-grid" style="margin-bottom:16px">
+        <div style="font-size:11px;color:var(--t3);font-weight:600">MEMBRO</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600;text-align:center">DESC %</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">PREVIEW (R$100k, A+)</div>
+        ${rows}
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Cap Maximo de Desconto (%)</label>
+          <input class="inp" type="number" min="0" max="80" value="${config.ecosystem_cap}" onchange="config.ecosystem_cap=+this.value;markDirty();render()" style="width:120px">
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">Desconto base + ecossistema nunca ultrapassa esse percentual</div>
+        </div>
+        <div class="field">
+          <label>Cap Absoluto em R$</label>
+          <input class="inp" type="number" min="0" step="10000" value="${config.ecosystem_cap_absolute}" onchange="config.ecosystem_cap_absolute=+this.value;markDirty();render()" style="width:160px">
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">Desconto nunca ultrapassa esse valor em R$ — protege margem em deals grandes</div>
+        </div>
+      </div>
+      <div style="padding:10px;border-radius:var(--rad-s);background:var(--ob);font-size:12px;color:var(--o);margin-top:8px">
+        &#9888; Para deals acima de ${fmt(config.ecosystem_cap_absolute / (config.ecosystem_cap/100))}, o cap absoluto de ${fmt(config.ecosystem_cap_absolute)} limita o desconto efetivo abaixo dos ${config.ecosystem_cap}%.
+      </div>
+    </div>`;
+}
+
+// =====================================================================
+// PAGE: OVERRIDES
+// =====================================================================
+function renderOverrides() {
+  const ovr = config.overrides;
+  let cards = '';
+  for (const [key, val] of Object.entries(ovr)) {
+    let fields = `
+      <div class="tgl-row" style="border:none;padding:0 0 8px">
+        <div class="tgl-label">Ativo<small>Override habilitado no motor</small></div>
+        <label class="tgl"><input type="checkbox" ${val.enabled?'checked':''} onchange="config.overrides['${key}'].enabled=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="field"><label>Parcelas extras no cartao</label><input class="inp" type="number" min="0" max="6" value="${val.extra_installments}" onchange="config.overrides['${key}'].extra_installments=+this.value;markDirty()" style="width:100px"></div>`;
+    if (val.down_reduction !== undefined) {
+      fields += `<div class="field"><label>Reducao de entrada (pp)</label><input class="inp" type="number" min="0" max="50" value="${val.down_reduction}" onchange="config.overrides['${key}'].down_reduction=+this.value;markDirty()" style="width:100px"></div>`;
+    }
+    cards += `<div class="ovr-card"><div class="ovr-title">${val.label}</div>${fields}</div>`;
+  }
+
+  return `
+    <div class="page-title">Overrides Contextuais</div>
+    <div class="page-sub">Ajustes automaticos aplicados com base no contexto do deal. Teto absoluto: ${config.general.max_installments}x.</div>
+    <div class="card">${cards}</div>`;
+}
+
+// =====================================================================
+// PAGE: SMART EXIT
+// =====================================================================
+function renderSmartExit() {
+  const se = config.smart_exit || { enabled:true, suggest_split:true, suggest_min_down:true, suggest_structured:true, split_threshold:1.5, max_split_contracts:3 };
+  if (!config.smart_exit) config.smart_exit = se;
+
+  return `
+    <div class="page-title">Saida Inteligente</div>
+    <div class="page-sub">Quando um deal excede o limite da faixa, o motor sugere alternativas em vez de apenas bloquear. Isso aumenta conversao sem aumentar risco.</div>
+    <div class="card">
+      <div class="card-title"><div class="dot" style="background:var(--ac)"></div> Configuracao</div>
+      <div class="tgl-row">
+        <div class="tgl-label">Saida Inteligente Ativa<small>Habilitar sugestoes automaticas quando deal excede limite</small></div>
+        <label class="tgl"><input type="checkbox" ${se.enabled?'checked':''} onchange="config.smart_exit.enabled=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="tgl-row">
+        <div class="tgl-label">Sugerir split de contratos<small>"Divida em 2 contratos de R$50k" quando deal > ${se.split_threshold}x limite</small></div>
+        <label class="tgl"><input type="checkbox" ${se.suggest_split?'checked':''} onchange="config.smart_exit.suggest_split=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="tgl-row">
+        <div class="tgl-label">Sugerir entrada minima<small>"Exija R$30k de entrada para liberar" — saldo fica no limite</small></div>
+        <label class="tgl"><input type="checkbox" ${se.suggest_min_down?'checked':''} onchange="config.smart_exit.suggest_min_down=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="tgl-row">
+        <div class="tgl-label">Sugerir pagamento estruturado<small>Caucao + promissoria + inicio diferido — para faixas C e D</small></div>
+        <label class="tgl"><input type="checkbox" ${se.suggest_structured?'checked':''} onchange="config.smart_exit.suggest_structured=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="row" style="margin-top:16px">
+        <div class="field"><label>Threshold para Split (ratio)</label><input class="inp" type="number" min="1" max="5" step="0.5" value="${se.split_threshold}" onchange="config.smart_exit.split_threshold=+this.value;markDirty()" style="width:100px"><div style="font-size:11px;color:var(--t3);margin-top:4px">Deal precisa ser ${se.split_threshold}x o limite para sugerir split</div></div>
+        <div class="field"><label>Max Contratos no Split</label><input class="inp" type="number" min="2" max="5" value="${se.max_split_contracts}" onchange="config.smart_exit.max_split_contracts=+this.value;markDirty()" style="width:100px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot" style="background:var(--b)"></div> Exemplo: Deal R$150k na faixa C (limite R$100k)</div>
+      <div style="padding:12px;border-radius:var(--rad-s);background:var(--ac2);font-size:12px">
+        ${se.suggest_split ? '<div style="margin-bottom:6px">&#128196; <strong>Dividir em 2 contratos de R$ 75.000</strong> — cada um dentro do limite</div>' : ''}
+        ${se.suggest_min_down ? '<div style="margin-bottom:6px">&#128176; <strong>Exigir R$ 50.000 de entrada (33%)</strong> — saldo financiado R$ 100.000</div>' : ''}
+        ${se.suggest_structured ? '<div>&#128209; <strong>Pagamento estruturado</strong> — caucao + promissoria + inicio em 60 dias</div>' : ''}
+        ${!se.suggest_split && !se.suggest_min_down && !se.suggest_structured ? '<div style="color:var(--t3)">Nenhuma sugestao ativa. O motor vai apenas mostrar "limite excedido".</div>' : ''}
+      </div>
+    </div>`;
+}
+
+// =====================================================================
+// PAGE: CATALOG
+// =====================================================================
+function renderCatalog() {
+  if (!config.catalog) config.catalog = JSON.parse(JSON.stringify(DEFAULT_CONFIG.catalog));
+  const cats = {};
+  config.catalog.forEach((p,i) => {
+    if (!cats[p.category]) cats[p.category] = [];
+    cats[p.category].push({...p, _idx: i});
+  });
+
+  let html = '<h2>Catalogo de Produtos</h2>';
+  html += '<p style="color:#999;margin-bottom:16px">Gerencie os produtos e precos que aparecem no simulador. O vendedor seleciona produto e vagas — o preco e calculado automaticamente.</p>';
+
+  for (const [cat, products] of Object.entries(cats)) {
+    html += `<div class="card" style="margin-bottom:12px">
+      <div class="card-title">${cat}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="color:#999;text-align:left;border-bottom:1px solid #333">
+          <th style="padding:6px 8px">Produto</th>
+          <th style="padding:6px 8px;width:120px">Preco (R$)</th>
+          <th style="padding:6px 8px;width:100px">BU</th>
+          <th style="padding:6px 8px;width:60px;text-align:center">Ativo</th>
+        </tr></thead><tbody>`;
+    for (const p of products) {
+      html += `<tr style="border-bottom:1px solid #222">
+        <td style="padding:6px 8px">${p.name}</td>
+        <td style="padding:6px 8px"><input type="number" value="${p.price}" style="width:100%;background:#1a1a24;border:1px solid #333;border-radius:6px;color:#fff;padding:4px 8px;font-size:13px" onchange="updateCatalogPrice(${p._idx}, this.value)"></td>
+        <td style="padding:6px 8px;color:#999">${p.bu}</td>
+        <td style="padding:6px 8px;text-align:center"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleCatalogActive(${p._idx}, this.checked)"></td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+  }
+
+  html += `<div style="margin-top:12px;display:flex;gap:8px">
+    <button class="btn btn-primary" onclick="addCatalogProduct()">+ Adicionar Produto</button>
+    <button class="btn" onclick="resetCatalog()" style="background:#333">Resetar para Padrao</button>
+  </div>`;
+  return html;
+}
+
+function updateCatalogPrice(idx, val) {
+  config.catalog[idx].price = parseFloat(val) || 0;
+  markDirty();
+}
+
+function toggleCatalogActive(idx, checked) {
+  config.catalog[idx].active = checked;
+  markDirty();
+}
+
+function addCatalogProduct() {
+  const name = prompt('Nome do produto:');
+  if (!name) return;
+  const price = parseFloat(prompt('Preco unitario (R$):', '1997')) || 0;
+  const bu = prompt('Business Unit:', 'Online') || 'Online';
+  const category = prompt('Categoria (Imersoes, Sprints, Online, Membership, Pass & Eventos):', 'Online') || 'Online';
+  config.catalog.push({ id: name.toLowerCase().replace(/\s+/g,'-'), name, price, bu, category, active: true });
+  markDirty();
+  render();
+}
+
+function resetCatalog() {
+  if (!confirm('Resetar catalogo para os precos padrao?')) return;
+  config.catalog = JSON.parse(JSON.stringify(DEFAULT_CONFIG.catalog));
+  markDirty();
+  render();
+}
+
+// =====================================================================
+// PAGE: POLICY
+// =====================================================================
+function renderPolicy() {
+  const versions = policyVersions;
+  const active = versions.length > 0 ? versions[0] : null;
+  const now = new Date();
+  const mn = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const curMonth = mn[now.getMonth()] + '/' + now.getFullYear();
+
+  const gc = {'A+':'g','A':'b','B':'y','C':'o','D':'r'};
+  let summary = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px">';
+  for (const [grade, rule] of Object.entries(config.rules)) {
+    const opt = rule.options.find(o => o.recommended) || rule.options[0];
+    let cond = '';
+    if (opt.type === 'pix') cond = 'Pix ' + opt.discount + '%';
+    else if (opt.type === 'structured') cond = 'Estr. ' + opt.max_installments + 'x';
+    else cond = opt.max_installments + 'x' + (opt.rate > 0 ? ' c/juros' : '');
+    summary += '<div style="background:var(--s2);border-radius:var(--rad-s);padding:12px;text-align:center;border:1px solid var(--bd2)">' +
+      '<div style="font-size:20px;font-weight:800;color:var(--' + gc[grade] + ')">' + grade + '</div>' +
+      '<div style="font-size:11px;color:var(--t3);margin:4px 0">' + fmt(rule.credit_limit) + '</div>' +
+      '<div style="font-size:12px;font-weight:600">' + cond + '</div>' +
+      '<div style="font-size:10px;color:var(--t3)">' + (opt.down_pct > 0 ? opt.down_pct + '% entrada' : 'sem entrada') + '</div>' +
+      '</div>';
+  }
+  summary += '</div>';
+
+  let hist = '';
+  if (versions.length === 0) {
+    hist = '<div style="text-align:center;padding:24px;color:var(--t3);font-size:13px">Nenhuma versao publicada. Configure as regras nas abas ao lado e publique aqui.</div>';
+  } else {
+    versions.forEach((v, i) => {
+      const isAct = i === 0;
+      const isExp = expandedPolicyVersion === i;
+      hist += '<div style="border:1px solid ' + (isAct ? 'var(--ac)' : 'var(--bd2)') + ';border-radius:var(--rad-s);margin-bottom:8px;overflow:hidden;' + (isAct ? 'background:var(--ac2)' : 'background:var(--s2)') + '">';
+      hist += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer" onclick="togglePolicyVersion(' + i + ')">';
+      hist += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+      hist += '<span style="font-weight:700;font-size:14px;' + (isAct ? 'color:var(--ac)' : '') + '">v' + v.version + '</span>';
+      if (isAct) hist += '<span style="font-size:10px;background:var(--ac);color:#fff;padding:2px 8px;border-radius:4px;font-weight:700">ATIVA</span>';
+      hist += '<span style="color:var(--t2);font-size:13px">' + v.month + '</span>';
+      hist += '<span style="color:var(--t3);font-size:12px">por ' + v.author + '</span>';
+      hist += '</div>';
+      hist += '<div style="display:flex;align-items:center;gap:8px">';
+      hist += '<span style="color:var(--t3);font-size:11px">' + new Date(v.published_at).toLocaleDateString('pt-BR') + '</span>';
+      hist += '<span style="font-size:12px;color:var(--t3)">' + (isExp ? '&#9650;' : '&#9660;') + '</span>';
+      hist += '</div></div>';
+      if (v.notes) hist += '<div style="padding:0 16px 8px;font-size:12px;color:var(--t2)">' + v.notes + '</div>';
+
+      if (isExp) {
+        const snap = v.config_snapshot;
+        hist += '<div style="padding:12px 16px;border-top:1px solid var(--bd2)">';
+        hist += '<div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Parametros desta versao</div>';
+        hist += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px">';
+        for (const [g, r] of Object.entries(snap.rules)) {
+          const o = r.options.find(x => x.recommended) || r.options[0];
+          const cur = config.rules[g];
+          const limDiff = cur && r.credit_limit !== cur.credit_limit;
+          hist += '<div style="background:var(--s1);border-radius:6px;padding:8px;font-size:11px;text-align:center">' +
+            '<div style="font-weight:700;color:var(--' + gc[g] + ')">' + g + '</div>' +
+            '<div style="' + (limDiff ? 'color:var(--y);font-weight:700' : 'color:var(--t3)') + '">' + fmt(r.credit_limit) + (limDiff ? ' *' : '') + '</div>' +
+            '<div>' + (o.type === 'pix' ? 'Pix ' + (o.discount||0) + '%' : (o.max_installments||0) + 'x') + '</div></div>';
+        }
+        hist += '</div>';
+        if (snap.ecosystem) {
+          hist += '<div style="font-size:11px;color:var(--t3);margin-bottom:8px">';
+          for (const [k, val] of Object.entries(snap.ecosystem)) {
+            const curE = config.ecosystem[k];
+            const diff = curE && val.discount !== curE.discount;
+            hist += '<span style="margin-right:12px;' + (diff ? 'color:var(--y);font-weight:600' : '') + '">' + val.name + ': ' + val.discount + '%' + (diff ? ' *' : '') + '</span>';
+          }
+          hist += '</div>';
+        }
+        hist += '<div style="display:flex;gap:8px;margin-top:4px">';
+        if (!isAct) hist += '<button class="btn-xs" style="border-color:var(--ac);color:var(--ac)" onclick="event.stopPropagation();restorePolicy(' + i + ')">Restaurar esta versao</button>';
+        hist += '<button class="btn-xs" onclick="event.stopPropagation();downloadPolicyVersion(' + i + ')">Baixar JSON</button>';
+        hist += '</div></div>';
+      }
+      hist += '</div>';
+    });
+  }
+
+  return '<div class="page-title">Politica Comercial</div>' +
+    '<div class="page-sub">Gerencie e versione a politica comercial mensal. Edite regras nas abas ao lado e publique aqui.</div>' +
+
+    '<div class="card">' +
+      '<div class="card-title"><div class="dot" style="background:var(--ac)"></div> Resumo da Configuracao Atual</div>' +
+      (active ? '<div style="font-size:12px;color:var(--t2);margin-bottom:4px">Ultima publicacao: <strong>' + active.month + '</strong> (v' + active.version + ') por ' + active.author + ' em ' + new Date(active.published_at).toLocaleDateString('pt-BR') + '</div>' : '<div style="font-size:12px;color:var(--y);margin-bottom:4px">Nenhuma versao publicada ainda.</div>') +
+      summary +
+    '</div>' +
+
+    '<div class="card">' +
+      '<div class="card-title"><div class="dot" style="background:var(--g)"></div> Publicar Nova Versao</div>' +
+      '<div style="font-size:12px;color:var(--t2);margin-bottom:12px">Cria um snapshot da configuracao atual. Edite regras, limites e descontos nas outras abas antes de publicar.</div>' +
+      '<div class="row">' +
+        '<div class="field"><label>Referencia (mes/ano)</label><input class="inp" id="policyMonth" value="' + curMonth + '"></div>' +
+        '<div class="field"><label>Autor</label><input class="inp" id="policyAuthor" value="" placeholder="Nome de quem publica"></div>' +
+      '</div>' +
+      '<div class="field"><label>Notas da versao</label><textarea class="inp" id="policyNotes" rows="2" placeholder="Ex: Ajuste de limites Q2, novo desconto Club..." style="resize:vertical"></textarea></div>' +
+      '<div style="display:flex;gap:8px;margin-top:12px">' +
+        '<button class="btn-save" onclick="publishPolicy()">Publicar Versao</button>' +
+        '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border-radius:var(--rad-s);border:1px solid var(--bd);font-size:12px;color:var(--t2);transition:.15s">' +
+          '&#128194; Importar JSON<input type="file" accept=".json" onchange="importPolicyFile(this)" style="display:none">' +
+        '</label>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="card">' +
+      '<div class="card-title"><div class="dot" style="background:var(--b)"></div> Historico (' + versions.length + (versions.length === 1 ? ' versao' : ' versoes') + ')</div>' +
+      hist +
+    '</div>';
+}
+
+function togglePolicyVersion(idx) {
+  expandedPolicyVersion = expandedPolicyVersion === idx ? -1 : idx;
+  render();
+}
+
+function publishPolicy() {
+  const month = document.getElementById('policyMonth').value.trim();
+  const author = document.getElementById('policyAuthor').value.trim();
+  const notes = document.getElementById('policyNotes').value.trim();
+  if (!month) { showToast('Informe o mes/ano de referencia'); return; }
+  if (!author) { showToast('Informe o autor da publicacao'); return; }
+
+  const version = policyVersions.length + 1;
+  policyVersions.unshift({
+    id: 'v' + version + '_' + Date.now(),
+    version: version,
+    month: month,
+    author: author,
+    published_at: new Date().toISOString(),
+    notes: notes,
+    config_snapshot: JSON.parse(JSON.stringify(config))
+  });
+  localStorage.setItem(POLICY_STORAGE_KEY, JSON.stringify(policyVersions));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  dirty = false;
+  document.getElementById('btnSave').disabled = true;
+  showToast('Versao ' + version + ' publicada com sucesso!');
+  render();
+}
+
+function restorePolicy(idx) {
+  const v = policyVersions[idx];
+  if (!confirm('Restaurar configuracao da versao ' + v.version + ' (' + v.month + ')?\nA configuracao atual sera substituida.')) return;
+  config = JSON.parse(JSON.stringify(v.config_snapshot));
+  markDirty();
+  render();
+  showToast('Versao ' + v.version + ' restaurada. Clique Salvar para persistir.');
+}
+
+function downloadPolicyVersion(idx) {
+  const v = policyVersions[idx];
+  const data = { version: v.version, month: v.month, author: v.author, published_at: v.published_at, notes: v.notes, config: v.config_snapshot };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'politica_v' + v.version + '_' + v.month.replace('/','-') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON da versao ' + v.version + ' baixado');
+}
+
+function importPolicyFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // Aceita tanto JSON direto de config quanto exportado com wrapper
+      const cfg = parsed.config || parsed;
+      if (!cfg.rules || !cfg.ecosystem) throw new Error('JSON invalido — precisa ter "rules" e "ecosystem"');
+      config = cfg;
+      markDirty();
+      render();
+      showToast('Politica importada! Revise e publique.');
+    } catch(err) {
+      showToast('Erro: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// =====================================================================
+// PAGE: SCORING
+// =====================================================================
+function renderScoring() {
+  const s = config.scoring;
+  const total = s.ml_weight + s.bureau_weight + s.behavioral_weight;
+  return `
+    <div class="page-title">Pesos do Score Composto</div>
+    <div class="page-sub">Defina quanto cada dimensao contribui para o G4 Risk Score (0-1000). Total deve ser 100%.</div>
+    <div class="card">
+      <div class="card-title">Composicao do Score</div>
+      <div class="field"><label>ML Interno (historico G4)</label>
+        <div class="row"><input class="inp" type="number" min="0" max="100" value="${s.ml_weight}" onchange="config.scoring.ml_weight=+this.value;markDirty();render()" style="width:80px"><span style="font-size:13px;color:var(--t2)">%</span></div>
+      </div>
+      <div class="field"><label>Bureau / Serasa</label>
+        <div class="row"><input class="inp" type="number" min="0" max="100" value="${s.bureau_weight}" onchange="config.scoring.bureau_weight=+this.value;markDirty();render()" style="width:80px"><span style="font-size:13px;color:var(--t2)">%</span></div>
+      </div>
+      <div class="field"><label>Comportamental (HubSpot)</label>
+        <div class="row"><input class="inp" type="number" min="0" max="100" value="${s.behavioral_weight}" onchange="config.scoring.behavioral_weight=+this.value;markDirty();render()" style="width:80px"><span style="font-size:13px;color:var(--t2)">%</span></div>
+      </div>
+      <div style="padding:12px;border-radius:var(--rad-s);background:${total===100?'var(--gb)':'var(--rb)'};font-size:13px;font-weight:600;color:${total===100?'var(--g)':'var(--r)'}">
+        Total: ${total}% ${total===100?'&#10003;':'— deve ser 100%'}
+      </div>
+    </div>`;
+}
+
+// =====================================================================
+// PAGE: BUSINESS UNITS
+// =====================================================================
+function renderBus() {
+  let items = config.bus.map((bu, i) =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd2)">
+      <input class="inp" value="${bu}" onchange="config.bus[${i}]=this.value;markDirty()" style="flex:1">
+      <button class="btn-xs danger" onclick="config.bus.splice(${i},1);markDirty();render()">X</button>
+    </div>`
+  ).join('');
+
+  return `
+    <div class="page-title">Business Units</div>
+    <div class="page-sub">Lista de BUs disponiveis para segmentacao de regras.</div>
+    <div class="card">
+      <div class="card-title">BUs Ativas</div>
+      ${items}
+      <button class="btn-add" onclick="config.bus.push('Nova BU');markDirty();render()">+ Adicionar BU</button>
+    </div>`;
+}
+
+// =====================================================================
+// PAGE: GENERAL
+// =====================================================================
+function renderGeneral() {
+  const g = config.general;
+  return `
+    <div class="page-title">Configuracoes Gerais</div>
+    <div class="page-sub">Parametros globais do motor de ofertas.</div>
+    <div class="card">
+      <div class="field"><label>Maximo de Parcelas (teto absoluto)</label><input class="inp" type="number" min="1" max="24" value="${g.max_installments}" onchange="config.general.max_installments=+this.value;markDirty()" style="width:100px"></div>
+      <div class="field"><label>Validade da Oferta (dias)</label><input class="inp" type="number" min="1" max="60" value="${g.default_validity_days}" onchange="config.general.default_validity_days=+this.value;markDirty()" style="width:100px"></div>
+      <div class="tgl-row">
+        <div class="tgl-label">Contrato obrigatorio<small>Exigir contrato em todas as faixas</small></div>
+        <label class="tgl"><input type="checkbox" ${g.require_contract?'checked':''} onchange="config.general.require_contract=this.checked;markDirty()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+    </div>`;
+}
+
+// =====================================================================
+// PAGE: SIMULATOR
+// =====================================================================
+function renderSimulator() {
+  return `
+    <div class="page-title">Simulador</div>
+    <div class="page-sub">Teste as configuracoes atuais em tempo real.</div>
+    <div class="card">
+      <div class="row">
+        <div class="field"><label>Valor do Deal</label><input class="inp" id="simAmt" type="number" value="100000" onchange="runSim()"></div>
+        <div class="field"><label>Faixa</label><select class="inp" id="simGrade" onchange="runSim()">${['A+','A','B','C','D'].map(g=>`<option>${g}</option>`).join('')}</select></div>
+        <div class="field"><label>Membro G4</label><select class="inp" id="simMembro" onchange="runSim()"><option value="">Nenhum</option>${Object.entries(config.ecosystem).map(([k,v])=>`<option value="${k}">${v.name} (${v.discount}%)</option>`).join('')}</select></div>
+      </div>
+      <div id="simResults" style="margin-top:16px"></div>
+    </div>`;
+}
+
+function runSim() {
+  const amt = +document.getElementById('simAmt').value;
+  const grade = document.getElementById('simGrade').value;
+  const membro = document.getElementById('simMembro').value;
+  const rule = config.rules[grade];
+  if (!rule) return;
+
+  let html = `<div style="font-size:14px;font-weight:700;margin-bottom:12px">${rule.name} — ${fmt(amt)}</div>`;
+  rule.options.forEach(opt => {
+    if (opt.type === 'pix') {
+      let disc = opt.discount;
+      if (membro) disc = Math.min(disc + (config.ecosystem[membro]?.discount||0), config.ecosystem_cap);
+      // Cap absoluto
+      const discValue = amt * (disc/100);
+      const capAbs = config.ecosystem_cap_absolute || 80000;
+      let capHit = false;
+      if (discValue > capAbs) { disc = Math.round((capAbs/amt)*1000)/10; capHit = true; }
+      const total = amt * (1-disc/100);
+      html += `<div class="preview" style="margin-bottom:8px"><div class="pv-title">Pix${capHit?' <span style="color:var(--o)">(cap R$ ativo)</span>':''}</div><div class="pv-main" style="color:var(--g)">${fmt(total)} (${disc}% off)</div><div class="pv-detail">Economia ${fmt(amt-total)}</div></div>`;
+    } else if (opt.type === 'boleto') {
+      const down = amt*(opt.down_pct/100);
+      html += `<div class="preview" style="margin-bottom:8px"><div class="pv-title">Boleto</div><div class="pv-main">${fmt(down)} + ${fmt(amt-down)}</div></div>`;
+    } else if (opt.type === 'structured') {
+      const down = amt*(opt.down_pct/100);
+      const fin = amt-down;
+      const inst = pmt(fin, opt.max_installments, 0);
+      const days = opt.deferred_days || 60;
+      html += `<div class="preview" style="margin-bottom:8px"><div class="pv-title" style="color:var(--b)">Estruturado</div><div class="pv-main" style="color:var(--b)">${opt.max_installments}x ${fmt(inst)} — inicio ${days}d</div><div class="pv-detail">Caucao ${fmt(down)} + cheque caucao + promissoria</div></div>`;
+    } else {
+      const down = amt*(opt.down_pct/100);
+      const fin = amt-down;
+      const inst = pmt(fin, opt.max_installments, opt.rate);
+      const total = down + inst*opt.max_installments;
+      html += `<div class="preview" style="margin-bottom:8px"><div class="pv-title">Cartao ${opt.rate>0?'(c/ juros)':'(s/ juros)'}</div><div class="pv-main">${opt.max_installments}x ${fmt(inst)}</div><div class="pv-detail">${opt.down_pct>0?'Entrada '+fmt(down)+' — ':''}Total ${fmt(total)}</div></div>`;
+    }
+  });
+
+  // Smart exit quando excede limite
+  if (amt > rule.credit_limit) {
+    const excess = amt - rule.credit_limit;
+    const minDownPct = Math.ceil((excess/amt)*100);
+    html += `<div style="margin-top:12px;padding:12px;border-radius:var(--rad-s);background:var(--ac2);border:1px solid var(--ac)">`;
+    html += `<div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:6px">&#128161; Saida Inteligente — deal excede limite de ${fmt(rule.credit_limit)}</div>`;
+    if (amt/rule.credit_limit >= 1.5) {
+      const n = amt/rule.credit_limit < 3 ? 2 : 3;
+      html += `<div style="font-size:11px;color:var(--t2);margin-bottom:4px">&#128196; Dividir em ${n} contratos de ${fmt(amt/n)}</div>`;
+    }
+    html += `<div style="font-size:11px;color:var(--t2);margin-bottom:4px">&#128176; Exigir ${fmt(excess)} entrada (${minDownPct}%) para ficar no limite</div>`;
+    html += `</div>`;
+  }
+
+  const r = rule;
+  html += `<div style="margin-top:12px;font-size:12px;color:var(--t3)">Limite: ${fmt(r.credit_limit)} | Promissoria: ${r.requires_promissory?'Sim':'Nao'} | Gerente: ${r.manager_above!==null?fmt(r.manager_above):'Nunca'} | Diretoria: ${r.director_above!==null?fmt(r.director_above):'Nunca'}</div>`;
+
+  document.getElementById('simResults').innerHTML = html;
+}
+
+// =====================================================================
+// PAGE: EXPORT
+// =====================================================================
+function renderExport() {
+  return `
+    <div class="page-title">Exportar / Importar</div>
+    <div class="page-sub">Exporte a configuracao atual como JSON ou importe de outro ambiente.</div>
+    <div class="card">
+      <div class="card-title">Exportar</div>
+      <button class="btn-save" onclick="exportConfig()" style="margin-bottom:12px">Baixar JSON</button>
+      <textarea class="inp" id="exportArea" rows="8" readonly style="font-family:monospace;font-size:11px">${JSON.stringify(config, null, 2)}</textarea>
+    </div>
+    <div class="card">
+      <div class="card-title">Importar</div>
+      <textarea class="inp" id="importArea" rows="6" placeholder="Cole o JSON aqui..." style="font-family:monospace;font-size:11px"></textarea>
+      <button class="btn-save" onclick="importConfig()" style="margin-top:8px">Importar</button>
+    </div>`;
+}
+
+function exportConfig() {
+  const blob = new Blob([JSON.stringify(config, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'g4_offer_engine_config.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON exportado!');
+}
+
+function importConfig() {
+  try {
+    const raw = document.getElementById('importArea').value;
+    const parsed = JSON.parse(raw);
+    if (!parsed.rules || !parsed.ecosystem) throw new Error('JSON invalido');
+    config = parsed;
+    markDirty();
+    render();
+    showToast('Configuracao importada! Clique Salvar para persistir.');
+  } catch(e) {
+    showToast('Erro: JSON invalido — ' + e.message);
+  }
+}
+
+// Init
+render();
+document.getElementById('btnSave').disabled = true;
+</script>
+</body>
+</html>

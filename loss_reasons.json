@@ -1,0 +1,14 @@
+[
+  {"motivo": "[SDR] Falta de Conexão - Tentativas esgotadas", "qtd": 39542, "ticket_medio": 38161, "tipo_risco": "operacional", "relevancia_score": "baixa"},
+  {"motivo": "[Validação] Fora do SLA de SAL - dados incorretos", "qtd": 36409, "ticket_medio": 27116, "tipo_risco": "operacional", "relevancia_score": "baixa"},
+  {"motivo": "[Qualquer etapa] Lead despriorizado", "qtd": 19504, "ticket_medio": 22599, "tipo_risco": "operacional", "relevancia_score": "baixa"},
+  {"motivo": "[IM] Não consegui aprovar - valores", "qtd": 13172, "ticket_medio": 27060, "tipo_risco": "financeiro", "relevancia_score": "alta"},
+  {"motivo": "[Validação] Fora do SLA - lead em aberto", "qtd": 12928, "ticket_medio": 44762, "tipo_risco": "operacional", "relevancia_score": "baixa"},
+  {"motivo": "[FS] Não demonstrou interesse", "qtd": 10434, "ticket_medio": 44968, "tipo_risco": "comercial", "relevancia_score": "media"},
+  {"motivo": "[IM] Perdi contato", "qtd": 10384, "ticket_medio": 31832, "tipo_risco": "comercial", "relevancia_score": "media"},
+  {"motivo": "[SKL] BANT - Não é o momento", "qtd": 1764, "ticket_medio": 40747, "tipo_risco": "timing", "relevancia_score": "media"},
+  {"motivo": "[SKL] BANT - Não tem budget", "qtd": 1239, "ticket_medio": 23262, "tipo_risco": "financeiro", "relevancia_score": "alta"},
+  {"motivo": "[SDR] Falta de budget", "qtd": 1097, "ticket_medio": 20699, "tipo_risco": "financeiro", "relevancia_score": "alta"},
+  {"motivo": "[IM] Não consegui aprovar - produto", "qtd": 2595, "ticket_medio": 32600, "tipo_risco": "comercial", "relevancia_score": "media"},
+  {"motivo": "[IM] Não consegui aprovar - agenda", "qtd": 1199, "ticket_medio": 32753, "tipo_risco": "timing", "relevancia_score": "media"}
+]
