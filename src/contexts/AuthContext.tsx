@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 interface AuthContextType {
   user: User | null;
