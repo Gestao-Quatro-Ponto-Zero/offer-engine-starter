@@ -39,7 +39,6 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -47,7 +46,6 @@ export function AppLayout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform lg:translate-x-0 lg:static lg:z-auto",
@@ -106,7 +104,6 @@ export function AppLayout() {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center gap-4 border-b px-4 py-3 lg:px-6">
           <button
