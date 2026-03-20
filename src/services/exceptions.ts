@@ -110,9 +110,9 @@ export async function getExceptionStats(): Promise<{
   if (error) throw error;
 
   const total = data.length;
-  const pending = data.filter((r) => r.status === "pending").length;
-  const approved = data.filter((r) => r.status === "approved").length;
-  const rejected = data.filter((r) => r.status === "rejected").length;
+  const pending = data.filter((r: { status: string }) => r.status === "pending").length;
+  const approved = data.filter((r: { status: string }) => r.status === "approved").length;
+  const rejected = data.filter((r: { status: string }) => r.status === "rejected").length;
   const decided = approved + rejected;
   const approval_rate = decided > 0 ? approved / decided : 0;
 
