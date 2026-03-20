@@ -1,3 +1,4 @@
+// Offers service
 import { supabase } from "@/lib/supabase";
 import type { OfferMenu } from "@/types/offers";
 

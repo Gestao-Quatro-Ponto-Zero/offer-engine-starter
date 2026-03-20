@@ -1,3 +1,4 @@
+// Exception types
 import type { RiskGrade } from "@/lib/constants";
 
 export type ExceptionStatus = "pending" | "approved" | "rejected" | "expired";

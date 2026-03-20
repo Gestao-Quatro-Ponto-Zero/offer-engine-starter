@@ -1,3 +1,4 @@
+// Rules service
 import { supabase } from "@/lib/supabase";
 import type { OfferRule, RuleHistoryEntry } from "@/types/rules";
 

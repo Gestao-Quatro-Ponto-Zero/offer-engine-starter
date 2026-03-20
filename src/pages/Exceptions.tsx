@@ -93,10 +93,7 @@ export default function Exceptions() {
 
       <div className="space-y-4">
         {(exceptions ?? []).map((exc) => (
-          <div
-            key={exc.id}
-            className="bg-card rounded-xl border p-6"
-          >
+          <div key={exc.id} className="bg-card rounded-xl border p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -122,7 +119,6 @@ export default function Exceptions() {
                   {exc.seller_email} · {formatCurrency(exc.deal_amount)} · Aprovador: {exc.approver_role}
                 </p>
               </div>
-
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {formatDate(exc.created_at)}
@@ -131,15 +127,11 @@ export default function Exceptions() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">
-                  Condições Desejadas
-                </p>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Condições Desejadas</p>
                 <p className="text-sm">{exc.desired_conditions}</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">
-                  Justificativa
-                </p>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Justificativa</p>
                 <p className="text-sm">{exc.justification}</p>
               </div>
             </div>

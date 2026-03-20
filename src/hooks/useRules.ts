@@ -1,3 +1,4 @@
+// Rules hooks
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRules, getRule, createRule, updateRule, getRuleHistory } from "@/services/rules";
 import type { OfferRule } from "@/types/rules";

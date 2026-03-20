@@ -1,3 +1,4 @@
+// Offer hooks
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { generateOffers, getOfferMenu, selectOffer, acceptOffer, rejectOffer } from "@/services/offers";
 
