@@ -1,3 +1,4 @@
+// Scoring types
 import type { RiskGrade } from "@/lib/constants";
 
 export interface ScoreComponent {

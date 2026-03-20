@@ -1,3 +1,4 @@
+// Dashboard hooks
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { getScoreDistribution } from "@/services/scoring";

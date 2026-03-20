@@ -1,3 +1,4 @@
+// Scoring service
 import { supabase } from "@/lib/supabase";
 import type { RiskScoreResult } from "@/types/scoring";
 

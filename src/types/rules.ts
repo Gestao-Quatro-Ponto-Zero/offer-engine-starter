@@ -1,3 +1,4 @@
+// Rule types
 import type { RiskGrade } from "@/lib/constants";
 import type { OfferType } from "./offers";
 

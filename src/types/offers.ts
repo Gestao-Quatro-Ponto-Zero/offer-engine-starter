@@ -1,3 +1,4 @@
+// Offer types
 export type OfferType = "parcelado" | "avista" | "pix" | "estruturado";
 export type OfferStatus = "pending" | "generated" | "presented" | "accepted" | "rejected";
 

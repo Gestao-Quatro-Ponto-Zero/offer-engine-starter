@@ -1,3 +1,4 @@
+// Database type definitions for G4 Offer Engine
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {

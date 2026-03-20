@@ -1,3 +1,4 @@
+// Exceptions service
 import { supabase } from "@/lib/supabase";
 import type {
   OfferException,
