@@ -179,7 +179,7 @@ export default function Dashboard() {
                 Nenhuma atividade registrada
               </p>
             ) : (
-              (audit ?? []).map((entry) => (
+              (audit ?? []).map((entry: { id: string; action: string; deal_id: string | null; user_email: string | null; created_at: string }) => (
                 <div
                   key={entry.id}
                   className="flex items-start gap-3 py-2 border-b last:border-0"
