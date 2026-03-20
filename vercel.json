@@ -1,0 +1,18 @@
+{
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "framework": null,
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/simulator", "destination": "/simulator.html" },
+    { "source": "/demo", "destination": "/video-demo.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

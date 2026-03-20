@@ -1,0 +1,123 @@
+# G4 Offers — Configuration
+# Sistema de Oferta de Condições de Pagamento Risk-Based
+
+project: "g4-offers"
+version: "1.0.0"
+
+# --- Risk Scoring ---
+scoring:
+  # Pesos do score composto (somam 1.0)
+  weights:
+    internal: 0.50    # G4 Collections ML model
+    bureau: 0.30      # Serasa Experian
+    behavioral: 0.20  # HubSpot behavioral signals
+
+  # Escala do score composto (0-1000)
+  scale: 1000
+
+  # Faixas de risco
+  grades:
+    "A+": { min: 850, max: 1000 }
+    "A":  { min: 700, max: 849 }
+    "B":  { min: 500, max: 699 }
+    "C":  { min: 300, max: 499 }
+    "D":  { min: 0,   max: 299 }
+
+  # Cache de bureau scores (dias)
+  bureau_cache_days: 30
+
+  # Re-score automático para deals abertos (dias)
+  auto_rescore_interval_days: 7
+
+# --- G4 Collections Model ---
+model:
+  # Caminho relativo ao model_v2.pkl do G4 Collections
+  path: "../g4_cobranca/outputs/model_v2.pkl"
+  # Probabilidade de inadimplência: invertemos para score de crédito
+  # score_interno = (1 - prob_inadimplencia) * 1000
+  invert: true
+
+# --- Offer Engine ---
+offers:
+  # Validade default de uma oferta (dias)
+  validity_days: 7
+
+  # Máximo de opções por menu
+  max_options: 3
+
+  # Exceções
+  exceptions:
+    max_per_seller_per_month: 2
+    alert_threshold_pct: 20  # alerta se >20% dos deals usam exceção
+    sla_hours: 2             # tempo para aprovador responder
+
+    # Roteamento de aprovação de exceção
+    approval_routing:
+      - max_amount: 100000
+        max_upgrade_levels: 1
+        approver_role: "manager"
+      - max_amount: 300000
+        max_upgrade_levels: 2
+        approver_role: "director"
+      - max_amount: 999999999
+        max_upgrade_levels: 99
+        approver_role: "vp"
+
+# --- Limites de crédito por faixa ---
+credit_limits:
+  "A+": 500000
+  "A":  300000
+  "B":  200000
+  "C":  100000
+  "D":  50000
+
+# --- HubSpot ---
+hubspot:
+  # Custom properties prefix
+  property_prefix: "g4_"
+
+  # Stages que trigam scoring automático
+  scoring_trigger_stages:
+    - "proposal"        # Proposta
+    - "negotiation"     # Negociação
+    - "qualifiedtobuy"  # Qualificado para compra
+
+  # Card settings
+  card:
+    title: "G4 Offers"
+    fetch_url_path: "/v1/hubspot/card"
+
+# --- Bureau (Serasa Experian) ---
+bureau:
+  # Base URL da API Serasa
+  base_url: "https://api.serasaexperian.com.br"
+  # Timeout em segundos
+  timeout: 10
+  # Score default quando bureau não disponível
+  fallback_score: 500
+
+# --- Infrastructure ---
+infra:
+  # Firestore collection names
+  firestore:
+    scores: "offer_scores"
+    offers: "offer_menus"
+    exceptions: "offer_exceptions"
+    rules: "offer_rules"
+    audit: "offer_audit"
+
+  # Redis (Cloud Memorystore)
+  redis:
+    ttl_bureau_seconds: 2592000  # 30 dias
+    ttl_session_seconds: 3600    # 1 hora
+
+# --- API ---
+api:
+  title: "G4 Offers API"
+  description: "Sistema inteligente de oferta de condições de pagamento"
+  version: "1.0.0"
+  prefix: "/v1"
+  cors_origins:
+    - "https://g4-offers.vercel.app"
+    - "https://app.hubspot.com"
+    - "http://localhost:3000"

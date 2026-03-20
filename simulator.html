@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G4 Offer Engine — Simulador de Cenários</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface-2: #1a1a24;
+    --surface-3: #22222e;
+    --border: #2a2a3a;
+    --border-subtle: #1e1e2e;
+    --text: #f0f0f5;
+    --text-2: #a0a0b5;
+    --text-3: #6a6a80;
+    --accent: #6366f1;
+    --accent-light: rgba(99,102,241,0.12);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --yellow: #eab308;
+    --yellow-bg: rgba(234,179,8,0.12);
+    --orange: #f97316;
+    --orange-bg: rgba(249,115,22,0.12);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.12);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header h1 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header .subtitle {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+
+  .container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px 32px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 24px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-subtle);
+    padding: 24px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* Form Controls */
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .grade-selector {
+    display: flex;
+    gap: 6px;
+  }
+
+  .grade-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-3);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .grade-btn:hover { border-color: var(--text-3); }
+  .grade-btn.active-aplus { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .grade-btn.active-a { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
+  .grade-btn.active-b { border-color: var(--yellow); background: var(--yellow-bg); color: var(--yellow); }
+  .grade-btn.active-c { border-color: var(--orange); background: var(--orange-bg); color: var(--orange); }
+  .grade-btn.active-d { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+  .amount-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .amount-input:focus { border-color: var(--accent); }
+  .amount-input[type="number"]::-webkit-outer-spin-button,
+  .amount-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .amount-input[type="number"] { -moz-appearance: textfield; }
+
+  .amount-presets {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .preset-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-3);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  select.form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-label {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .toggle-label small {
+    display: block;
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+
+  .toggle {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    cursor: pointer;
+  }
+
+  .toggle input { display: none; }
+
+  .toggle .slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface-3);
+    border-radius: 11px;
+    transition: background 0.2s;
+  }
+
+  .toggle .slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-3);
+    top: 3px;
+    left: 3px;
+    transition: all 0.2s;
+  }
+
+  .toggle input:checked + .slider { background: var(--accent); }
+  .toggle input:checked + .slider::before { transform: translateX(18px); background: #fff; }
+
+  /* Results */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .grade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .grade-badge.aplus { background: var(--green-bg); color: var(--green); }
+  .grade-badge.a { background: var(--blue-bg); color: var(--blue); }
+  .grade-badge.b { background: var(--yellow-bg); color: var(--yellow); }
+  .grade-badge.c { background: var(--orange-bg); color: var(--orange); }
+  .grade-badge.d { background: var(--red-bg); color: var(--red); }
+
+  .offer-card {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    transition: border-color 0.15s;
+  }
+
+  .offer-card:hover { border-color: var(--border); }
+
+  .offer-card.recommended {
+    border: 2px solid var(--accent);
+    background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02));
+  }
+
+  .offer-card.structured {
+    border: 1px solid var(--blue);
+    background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(59,130,246,0.02));
+  }
+
+  .offer-badge {
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 0 0 6px 6px;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .offer-type {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+
+  .offer-label {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .offer-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .offer-detail {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+
+  .offer-detail .dt {
+    font-size: 10px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+
+  .offer-detail .dd {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .offer-detail .dd.green { color: var(--green); }
+  .offer-detail .dd.red { color: var(--red); }
+
+  .offer-flags {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .flag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .flag.warn { background: var(--orange-bg); color: var(--orange); }
+  .flag.info { background: var(--blue-bg); color: var(--blue); }
+  .flag.ok { background: var(--green-bg); color: var(--green); }
+
+  /* Restrictions */
+  .restrictions-card {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 16px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .restrictions-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+
+  .restriction-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+
+  .restriction-row .label { color: var(--text-2); }
+  .restriction-row .value { font-weight: 600; }
+
+  /* Score Gauge */
+  .score-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .score-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .score-info { flex: 1; }
+  .score-info .score-label { font-size: 12px; color: var(--text-3); }
+  .score-info .score-range { font-size: 14px; font-weight: 600; }
+  .score-info .score-desc { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+  /* Comparison table */
+  .comparison {
+    margin-top: 16px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .comparison table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .comparison th {
+    background: var(--surface-2);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comparison td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--surface);
+  }
+
+  .comparison tr:last-child td { border-bottom: none; }
+
+  .comparison .highlight { color: var(--accent); font-weight: 600; }
+  .comparison .saving { color: var(--green); font-weight: 600; }
+  .comparison .cost { color: var(--red); font-weight: 600; }
+
+  .eco-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-light);
+    color: var(--accent);
+    margin-left: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .offer-details { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span>G4</span> Offer Engine</h1>
+  </div>
+  <div class="subtitle">Simulador de Cenarios | Politica Comercial Mar/2026</div>
+</div>
+
+<div class="container">
+  <div class="page-title">Simulador de Ofertas</div>
+  <div class="page-subtitle">Configure o cenario e veja as condicoes de pagamento geradas pelo motor de regras</div>
+
+  <div class="grid-2">
+    <!-- Left: Controls -->
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">
+          <div class="icon" style="background:var(--accent-light);color:var(--accent)">$</div>
+          Parametros do Deal
+        </div>
+
+        <div class="field">
+          <label>Faixa de Risco</label>
+          <div class="grade-selector" id="gradeSelector">
+            <button class="grade-btn active-aplus" data-grade="A+" onclick="selectGrade('A+')">A+</button>
+            <button class="grade-btn" data-grade="A" onclick="selectGrade('A')">A</button>
+            <button class="grade-btn" data-grade="B" onclick="selectGrade('B')">B</button>
+            <button class="grade-btn" data-grade="C" onclick="selectGrade('C')">C</button>
+            <button class="grade-btn" data-grade="D" onclick="selectGrade('D')">D</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Modo de Entrada</label>
+          <div class="grade-selector" id="inputModeSelector">
+            <button class="grade-btn active-aplus" data-mode="catalog" onclick="setInputMode('catalog')" style="flex:1">Catalogo</button>
+            <button class="grade-btn" data-mode="manual" onclick="setInputMode('manual')" style="flex:1">Valor Manual</button>
+          </div>
+        </div>
+
+        <div id="catalogMode">
+          <div class="field">
+            <label>Produto</label>
+            <select class="form-select" id="productSelect" onchange="onProductChange()">
+              <optgroup label="Imersoes (Presencial)">
+                <option value="ge" data-price="35120" data-bu="Imersões">G4 Gestao e Estrategia</option>
+                <option value="traction" data-price="17900" data-bu="Imersões">G4 Traction</option>
+                <option value="advisor" data-price="24900" data-bu="Imersões">G4 Advisor</option>
+                <option value="flg" data-price="16900" data-bu="Imersões">G4 Founder Led Growth</option>
+                <option value="sales" data-price="9900" data-bu="Imersões">G4 Sales</option>
+                <option value="gp" data-price="9900" data-bu="Imersões">G4 Gestao de Pessoas</option>
+                <option value="mktgrowth" data-price="8900" data-bu="Imersões">G4 Marketing e Growth</option>
+                <option value="formia" data-price="8000" data-bu="Imersões">G4 Formacao em IA</option>
+                <option value="aiacademy" data-price="4543" data-bu="Imersões">G4 AI Academy</option>
+                <option value="acadvendas" data-price="3997" data-bu="Imersões">G4 Academia de Vendedores</option>
+                <option value="acadlider" data-price="4500" data-bu="Imersões">G4 Academia de Lideranca</option>
+                <option value="oratoria" data-price="697" data-bu="Online">G4 Oratoria Empresarial</option>
+              </optgroup>
+              <optgroup label="Sprints (Consultoria)">
+                <option value="sprint-pe" data-price="41500" data-bu="Sprints">G4 Sprints - Planejamento Estrategico</option>
+                <option value="sprint-receita" data-price="29900" data-bu="Sprints">G4 Sprints - Aumento de Receita</option>
+                <option value="sprint-cultura" data-price="30000" data-bu="Sprints">G4 Sprints - Cultura</option>
+                <option value="gestaoempresarial" data-price="6997" data-bu="Sprints">G4 Gestao Empresarial</option>
+              </optgroup>
+              <optgroup label="Online">
+                <option value="novaformacao" data-price="1997" data-bu="Online">Nova Formacao G4</option>
+                <option value="formvendas" data-price="1497" data-bu="Online">Formacao em Vendas</option>
+                <option value="aipratica" data-price="1497" data-bu="Skills">G4 AI na Pratica</option>
+                <option value="lideranca" data-price="697" data-bu="Online">G4 Lideranca e Alta Performance</option>
+                <option value="mktestrat" data-price="1997" data-bu="Online">Marketing Estrategico</option>
+                <option value="novosnegocios" data-price="997" data-bu="Online">G4 Formacao em Novos Negocios</option>
+                <option value="financas" data-price="697" data-bu="Online">G4 Fundamentos em Financas</option>
+              </optgroup>
+              <optgroup label="Membership (Recorrente)">
+                <option value="scale" data-price="50900" data-bu="Scale">G4 Scale</option>
+                <option value="club" data-price="210140" data-bu="Club">G4 Club</option>
+                <option value="skills-lic" data-price="3997" data-bu="Skills">Licencas Skills</option>
+              </optgroup>
+              <optgroup label="Pass & Eventos">
+                <option value="pass-vit" data-price="2997" data-bu="Skills">G4 Pass Vitalicio</option>
+                <option value="pass-novo" data-price="2997" data-bu="Online">O Novo G4 Pass</option>
+                <option value="valley-presencial" data-price="850" data-bu="Valley">G4 Valley Presencial</option>
+                <option value="valley-atlas" data-price="2400" data-bu="Valley">G4 Valley Atlas</option>
+                <option value="valley-club" data-price="6320" data-bu="Valley">G4 Valley Club Experience</option>
+                <option value="pelobrasil" data-price="847" data-bu="G4peloBrasil">G4 Pelo Brasil</option>
+                <option value="pelobrasil-vip" data-price="1447" data-bu="G4peloBrasil">G4 Pelo Brasil VIP</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field">
+            <label>Preco Unitario (R$) <small style="color:var(--text-3)">— mediana do catalogo</small></label>
+            <input type="text" class="amount-input" id="unitPrice" value="35.120" oninput="onCatalogChange()">
+          </div>
+          <div class="field">
+            <label>Vagas / Quantidade</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="preset-btn" onclick="changeQty(-1)" style="width:36px;padding:6px">-</button>
+              <input type="number" class="amount-input" id="qty" value="1" min="1" max="999" style="width:70px;text-align:center" oninput="onCatalogChange()">
+              <button class="preset-btn" onclick="changeQty(1)" style="width:36px;padding:6px">+</button>
+              <div class="amount-presets" style="margin-top:0">
+                <button class="preset-btn" onclick="setQty(1)">1</button>
+                <button class="preset-btn" onclick="setQty(2)">2</button>
+                <button class="preset-btn" onclick="setQty(5)">5</button>
+                <button class="preset-btn" onclick="setQty(10)">10</button>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--surface-3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em">Valor Total do Deal</div>
+              <div id="catalogTotal" style="font-size:22px;font-weight:700;color:var(--accent)">R$ 35.120</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--text-3)">BU detectada</div>
+              <div id="catalogBU" style="font-size:14px;font-weight:600;color:var(--text)">Imersoes</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="manualMode" style="display:none">
+          <div class="field">
+            <label>Valor do Deal (R$)</label>
+            <input type="text" class="amount-input" id="dealAmount" value="50.000" oninput="onAmountChange(this)">
+            <div class="amount-presets">
+              <button class="preset-btn" onclick="setAmount(25000)">R$25k</button>
+              <button class="preset-btn" onclick="setAmount(50000)">R$50k</button>
+              <button class="preset-btn" onclick="setAmount(100000)">R$100k</button>
+              <button class="preset-btn" onclick="setAmount(200000)">R$200k</button>
+              <button class="preset-btn" onclick="setAmount(500000)">R$500k</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Business Unit</label>
+            <select class="form-select" id="buSelect" onchange="simulate()">
+              <option value="Scale">Scale Experience</option>
+              <option value="Club">Club</option>
+              <option value="Valley">Valley</option>
+              <option value="G4peloBrasil">G4 pelo Brasil</option>
+              <option value="Poker">Poker</option>
+              <option value="Jantar">Jantar G&E</option>
+              <option value="Class">Class</option>
+              <option value="Skills">Skills</option>
+              <option value="Imersões">Imersoes</option>
+              <option value="Sprints">Sprints</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">
+          <div class="icon" style="background:var(--green-bg);color:var(--green)">%</div>
+          Contexto & Overrides
+        </div>
+
+        <div class="field">
+          <label>Membro Ecossistema G4</label>
+          <select class="form-select" id="membroSelect" onchange="simulate()">
+            <option value="">Nenhum</option>
+            <option value="club">Club (30% desc)</option>
+            <option value="scale">Scale (15% desc)</option>
+            <option value="tools">Tools (30% desc)</option>
+            <option value="tools_fee">Tools + Fee (40% desc)</option>
+            <option value="mentores">Mentores (30% desc)</option>
+          </select>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            Recompra
+            <small>Cliente com historico excelente</small>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleRecompra" onchange="simulate()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            Campanha Ativa
+            <small>+3 parcelas, -10pp entrada</small>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleCampanha" onchange="simulate()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            Field Sales
+            <small>Venda presencial: +2 parcelas</small>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleField" onchange="simulate()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div id="results">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// G4 OFFER ENGINE — JavaScript Implementation
+// =====================================================================
+
+const RULES = {
+  'A+': {
+    name: 'A+ Premium',
+    score: '850-1000',
+    desc: 'Melhor perfil — condicoes maximas G4',
+    color: 'green',
+    options: [
+      { type: 'installment', label: '{n}x sem juros no cartao', max: 12, down: 0, rate: 0, recommended: true },
+      { type: 'pix', label: 'Pix a vista com {d}% de desconto', discount: 10 },
+      { type: 'boleto', label: 'Boleto: 50% entrada + 50% pre-evento', down: 50, discount: 0 },
+    ],
+    restrictions: { contract: true, promissory: false, managerAbove: null, directorAbove: null, creditMax: 500000 }
+  },
+  'A': {
+    name: 'A Bom',
+    score: '700-849',
+    desc: 'Bom perfil — condicoes competitivas',
+    color: 'blue',
+    options: [
+      { type: 'installment', label: '{n}x sem juros + {e}% entrada', max: 10, down: 10, rate: 0, recommended: true },
+      { type: 'installment', label: '{n}x com juros ({r}% a.m.) + {e}% entrada', max: 12, down: 20, rate: 1.5 },
+      { type: 'pix', label: 'Pix a vista com {d}% de desconto', discount: 8 },
+    ],
+    restrictions: { contract: true, promissory: false, managerAbove: 200000, directorAbove: null, creditMax: 350000 }
+  },
+  'B': {
+    name: 'B Moderado',
+    score: '500-699',
+    desc: 'Perfil moderado — condicoes com protecao',
+    color: 'yellow',
+    options: [
+      { type: 'installment', label: '{n}x sem juros + {e}% entrada', max: 8, down: 20, rate: 0, recommended: true },
+      { type: 'installment', label: '{n}x com juros ({r}% a.m.) + {e}% entrada', max: 10, down: 30, rate: 2.0 },
+      { type: 'pix', label: 'Pix a vista com {d}% de desconto', discount: 5 },
+    ],
+    restrictions: { contract: true, promissory: true, managerAbove: 100000, directorAbove: null, creditMax: 200000 }
+  },
+  'C': {
+    name: 'C Restrito',
+    score: '300-499',
+    desc: 'Perfil restrito — condicoes conservadoras',
+    color: 'orange',
+    options: [
+      { type: 'installment', label: '{n}x sem juros + {e}% entrada', max: 6, down: 40, rate: 0, recommended: true },
+      { type: 'structured', label: 'Estruturado: inicio em 60 dias', max: 6, down: 40 },
+      { type: 'pix', label: 'Pix a vista com {d}% de desconto', discount: 3 },
+    ],
+    restrictions: { contract: true, promissory: true, managerAbove: 0, directorAbove: 200000, creditMax: 100000 }
+  },
+  'D': {
+    name: 'D Alto Risco',
+    score: '0-299',
+    desc: 'Alto risco — apenas Pix ou cartao minimo',
+    color: 'red',
+    options: [
+      { type: 'pix', label: 'Pix a vista com {d}% de desconto', discount: 3, recommended: true },
+      { type: 'installment', label: '{n}x no cartao + {e}% entrada', max: 3, down: 50, rate: 0 },
+      { type: 'structured', label: 'Estruturado: inicio em 60 dias', max: 3, down: 60 },
+    ],
+    restrictions: { contract: true, promissory: true, managerAbove: 0, directorAbove: 0, creditMax: 50000 }
+  }
+};
+
+const ECO_DISCOUNTS = { club: 30, scale: 15, tools: 30, tools_fee: 40, mentores: 30 };
+const ECO_LABELS = { club: 'Club', scale: 'Scale', tools: 'Tools', tools_fee: 'Tools+Fee', mentores: 'Mentores' };
+const ECO_CAP_ABSOLUTE = 80000; // Max R$80k de desconto independente do %
+const MAX_INSTALLMENTS = 12;
+
+let currentGrade = 'A+';
+
+function formatCurrency(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function formatCurrencyFull(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function pmt(principal, n, ratePct) {
+  if (n <= 0) return principal;
+  if (ratePct <= 0) return principal / n;
+  const r = ratePct / 100;
+  return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+}
+
+function selectGrade(g) {
+  currentGrade = g;
+  const classes = { 'A+': 'active-aplus', 'A': 'active-a', 'B': 'active-b', 'C': 'active-c', 'D': 'active-d' };
+  document.querySelectorAll('.grade-btn').forEach(btn => {
+    btn.className = 'grade-btn';
+    if (btn.dataset.grade === g) btn.classList.add(classes[g]);
+  });
+  simulate();
+}
+
+function parseAmount(str) {
+  return parseInt(str.replace(/\D/g, '')) || 0;
+}
+
+function formatAmountInput(v) {
+  return v.toLocaleString('pt-BR');
+}
+
+function onAmountChange(el) {
+  const v = parseAmount(el.value);
+  const pos = el.selectionStart;
+  el.value = formatAmountInput(v);
+  simulate();
+}
+
+function setAmount(v) {
+  document.getElementById('dealAmount').value = formatAmountInput(v);
+  simulate();
+}
+
+// --- Catalog mode functions ---
+let inputMode = 'catalog';
+
+function setInputMode(mode) {
+  inputMode = mode;
+  document.getElementById('catalogMode').style.display = mode === 'catalog' ? 'block' : 'none';
+  document.getElementById('manualMode').style.display = mode === 'manual' ? 'block' : 'none';
+  document.querySelectorAll('#inputModeSelector .grade-btn').forEach(b => {
+    b.classList.remove('active-aplus');
+    if (b.dataset.mode === mode) b.classList.add('active-aplus');
+  });
+  simulate();
+}
+
+function onProductChange() {
+  const sel = document.getElementById('productSelect');
+  const opt = sel.options[sel.selectedIndex];
+  const price = parseFloat(opt.dataset.price) || 0;
+  document.getElementById('unitPrice').value = formatAmountInput(price);
+  document.getElementById('catalogBU').textContent = opt.dataset.bu || '-';
+  onCatalogChange();
+}
+
+function onCatalogChange() {
+  const price = parseAmount(document.getElementById('unitPrice').value);
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  const total = price * qty;
+  document.getElementById('catalogTotal').textContent = 'R$ ' + formatAmountInput(total);
+  simulate();
+}
+
+function changeQty(delta) {
+  const el = document.getElementById('qty');
+  el.value = Math.max(1, parseInt(el.value || 1) + delta);
+  onCatalogChange();
+}
+
+function setQty(v) {
+  document.getElementById('qty').value = v;
+  onCatalogChange();
+}
+
+function getSimulationParams() {
+  let amount, bu;
+  if (inputMode === 'catalog') {
+    const price = parseAmount(document.getElementById('unitPrice').value);
+    const qty = parseInt(document.getElementById('qty').value) || 1;
+    amount = price * qty;
+    const sel = document.getElementById('productSelect');
+    const opt = sel.options[sel.selectedIndex];
+    bu = opt.dataset.bu || 'Imersões';
+  } else {
+    amount = parseAmount(document.getElementById('dealAmount').value);
+    bu = document.getElementById('buSelect').value;
+  }
+  return { amount, bu };
+}
+
+function simulate() {
+  const { amount, bu } = getSimulationParams();
+  const grade = currentGrade;
+  const membro = document.getElementById('membroSelect').value;
+  const isRecompra = document.getElementById('toggleRecompra').checked;
+  const isCampanha = document.getElementById('toggleCampanha').checked;
+  const isField = document.getElementById('toggleField').checked;
+
+  const rule = RULES[grade];
+  if (!rule || amount <= 0) return;
+
+  // Generate offers
+  const offers = [];
+  for (const opt of rule.options) {
+    if (opt.type === 'pix') {
+      let discount = opt.discount;
+      let ecoExtra = 0;
+      // Eco discount
+      if (membro && ECO_DISCOUNTS[membro]) {
+        ecoExtra = ECO_DISCOUNTS[membro];
+        discount = Math.min(discount + ecoExtra, 40);
+        // Cap absoluto: desconto nunca ultrapassa ECO_CAP_ABSOLUTE
+        const discountValue = amount * (discount / 100);
+        if (discountValue > ECO_CAP_ABSOLUTE) {
+          discount = Math.round((ECO_CAP_ABSOLUTE / amount) * 1000) / 10;
+        }
+      }
+      const total = amount * (1 - discount / 100);
+      offers.push({
+        type: 'Pix',
+        label: opt.label.replace('{d}', discount),
+        installments: 1,
+        installmentValue: total,
+        downPct: 100,
+        downValue: total,
+        rate: 0,
+        discount: discount,
+        total: total,
+        recommended: opt.recommended || false,
+        ecoApplied: membro && ECO_DISCOUNTS[membro] ? true : false,
+        ecoExtra: ecoExtra,
+        capApplied: membro && amount * (Math.min(opt.discount + ecoExtra, 40) / 100) > ECO_CAP_ABSOLUTE,
+      });
+    } else if (opt.type === 'boleto') {
+      let discount = opt.discount || 0;
+      if (membro && ECO_DISCOUNTS[membro]) {
+        discount = Math.min(discount + ECO_DISCOUNTS[membro], 40);
+        const discountValue = amount * (discount / 100);
+        if (discountValue > ECO_CAP_ABSOLUTE) {
+          discount = Math.round((ECO_CAP_ABSOLUTE / amount) * 1000) / 10;
+        }
+      }
+      const total = amount * (1 - discount / 100);
+      const downValue = total * (opt.down / 100);
+      offers.push({
+        type: 'Boleto',
+        label: opt.label,
+        installments: 1,
+        installmentValue: total - downValue,
+        downPct: opt.down,
+        downValue: downValue,
+        rate: 0,
+        discount: discount,
+        total: total,
+        recommended: opt.recommended || false,
+        ecoApplied: membro && ECO_DISCOUNTS[membro] && discount > 0 ? true : false,
+        ecoExtra: 0,
+      });
+    } else if (opt.type === 'structured') {
+      // Pagamento Estruturado: inicio diferido 60 dias + caucao + promissoria
+      const downPct = opt.down || 40;
+      const downValue = amount * (downPct / 100); // caucao
+      const financed = amount - downValue;
+      const n = opt.max || 6;
+      const installmentValue = pmt(financed, n, 0);
+      const total = downValue + installmentValue * n;
+
+      offers.push({
+        type: 'Estruturado',
+        label: `${n}x inicio em 60 dias + ${downPct}% caucao`,
+        installments: n,
+        installmentValue: installmentValue,
+        downPct: downPct,
+        downValue: downValue,
+        rate: 0,
+        discount: 0,
+        total: total,
+        recommended: opt.recommended || false,
+        ecoApplied: false,
+        ecoExtra: 0,
+        isStructured: true,
+      });
+    } else {
+      // Installment
+      let n = opt.max;
+      let downPct = opt.down;
+
+      // Overrides
+      if (isRecompra) n = Math.min(n + 2, MAX_INSTALLMENTS);
+      if (isCampanha) { n = Math.min(n + 3, MAX_INSTALLMENTS); downPct = Math.max(0, downPct - 10); }
+      if (isField) n = Math.min(n + 2, MAX_INSTALLMENTS);
+
+      const downValue = amount * (downPct / 100);
+      const financed = amount - downValue;
+      const installmentValue = pmt(financed, n, opt.rate);
+      const total = downValue + installmentValue * n;
+
+      let label = opt.label
+        .replace('{n}', n)
+        .replace('{e}', downPct)
+        .replace('{r}', opt.rate);
+
+      offers.push({
+        type: 'Cartao',
+        label: label,
+        installments: n,
+        installmentValue: installmentValue,
+        downPct: downPct,
+        downValue: downValue,
+        rate: opt.rate,
+        discount: 0,
+        total: total,
+        recommended: opt.recommended || false,
+        ecoApplied: false,
+        ecoExtra: 0,
+        overrides: { recompra: isRecompra, campanha: isCampanha, field: isField },
+      });
+    }
+  }
+
+  // Check restrictions
+  const r = rule.restrictions;
+  const needsManager = r.managerAbove !== null && amount >= r.managerAbove;
+  const needsDirector = r.directorAbove !== null && amount >= r.directorAbove;
+  const overLimit = amount > r.creditMax;
+
+  // Smart Exits: sugestoes inteligentes quando deal excede limite
+  const smartExits = [];
+  if (overLimit) {
+    const excess = amount - r.creditMax;
+    const ratio = r.creditMax > 0 ? amount / r.creditMax : 999;
+
+    // Split em contratos
+    if (ratio >= 1.5) {
+      const nContracts = ratio < 3 ? 2 : 3;
+      const amountEach = Math.round(amount / nContracts);
+      smartExits.push({
+        icon: '&#128196;',
+        title: `Dividir em ${nContracts} contratos de ${formatCurrency(amountEach)}`,
+        desc: `Cada contrato fica dentro do limite de ${formatCurrency(r.creditMax)} da faixa ${grade}.`
+      });
+    }
+
+    // Entrada minima
+    const minDownPct = Math.ceil((excess / amount) * 100);
+    smartExits.push({
+      icon: '&#128176;',
+      title: `Exigir ${formatCurrency(excess)} de entrada (${minDownPct}%)`,
+      desc: `Saldo financiado fica em ${formatCurrency(r.creditMax)} — dentro do limite da faixa.`
+    });
+
+    // Pagamento estruturado (C e D)
+    if (grade === 'C' || grade === 'D') {
+      smartExits.push({
+        icon: '&#128209;',
+        title: 'Pagamento estruturado com inicio diferido',
+        desc: 'Caucao + promissoria digital + inicio em 60 dias. Fecha o deal sem aumentar risco.'
+      });
+    }
+  }
+
+  const productInfo = inputMode === 'catalog' ? {
+    name: document.getElementById('productSelect').options[document.getElementById('productSelect').selectedIndex].text,
+    qty: parseInt(document.getElementById('qty').value) || 1,
+    unitPrice: parseAmount(document.getElementById('unitPrice').value),
+    bu: bu
+  } : null;
+
+  renderResults(grade, rule, amount, offers, { needsManager, needsDirector, overLimit, membro, isRecompra, isCampanha, isField, smartExits, productInfo });
+}
+
+function renderResults(grade, rule, amount, offers, ctx) {
+  const gradeClass = { 'A+': 'aplus', 'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd' }[grade];
+  const gradeColorVar = { 'A+': 'green', 'A': 'blue', 'B': 'yellow', 'C': 'orange', 'D': 'red' }[grade];
+
+  let html = '';
+
+  // Product info (catalog mode)
+  if (ctx.productInfo) {
+    const p = ctx.productInfo;
+    html += `
+      <div style="background:var(--surface-3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em">Produto</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text)">${p.name}</div>
+          <div style="font-size:12px;color:var(--text-2)">${p.qty} vaga${p.qty > 1 ? 's' : ''} x ${formatCurrency(p.unitPrice)} &middot; BU: ${p.bu}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--text-3)">Total</div>
+          <div style="font-size:20px;font-weight:700;color:var(--accent)">${formatCurrency(amount)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Score section
+  html += `
+    <div class="score-section">
+      <div class="score-circle" style="background:var(--${gradeColorVar}-bg);color:var(--${gradeColorVar})">
+        ${grade}
+      </div>
+      <div class="score-info">
+        <div class="score-label">Faixa de Risco</div>
+        <div class="score-range">${rule.name} (${rule.score})</div>
+        <div class="score-desc">${rule.desc}</div>
+      </div>
+    </div>
+  `;
+
+  // Offers
+  html += `<div class="results-header">
+    <div style="font-size:14px;font-weight:600">Opcoes de Pagamento</div>
+    <span class="grade-badge ${gradeClass}">Deal: ${formatCurrency(amount)}</span>
+  </div>`;
+
+  for (const offer of offers) {
+    const isRec = offer.recommended;
+    html += `<div class="offer-card${isRec ? ' recommended' : ''}${offer.isStructured ? ' structured' : ''}">`;
+    if (isRec) html += `<div class="offer-badge">Recomendada</div>`;
+
+    let typeBadge = offer.ecoApplied ? '<span class="eco-badge">Eco G4 -' + offer.ecoExtra + '%</span>' : '';
+    if (offer.capApplied) typeBadge += '<span class="eco-badge" style="background:var(--orange-bg);color:var(--orange)">Cap R$80k</span>';
+    html += `<div class="offer-type">${offer.type}${typeBadge}</div>`;
+    html += `<div class="offer-label">${offer.label}</div>`;
+
+    html += `<div class="offer-details">`;
+
+    if (offer.type === 'Pix') {
+      html += `
+        <div class="offer-detail"><div class="dt">Total</div><div class="dd green">${formatCurrencyFull(offer.total)}</div></div>
+        <div class="offer-detail"><div class="dt">Desconto</div><div class="dd green">${offer.discount}%</div></div>
+        <div class="offer-detail"><div class="dt">Economia</div><div class="dd green">${formatCurrency(amount - offer.total)}</div></div>
+      `;
+    } else if (offer.type === 'Boleto') {
+      html += `
+        <div class="offer-detail"><div class="dt">Entrada</div><div class="dd">${formatCurrency(offer.downValue)}</div></div>
+        <div class="offer-detail"><div class="dt">2a Parcela</div><div class="dd">${formatCurrency(offer.total - offer.downValue)}</div></div>
+        <div class="offer-detail"><div class="dt">Total</div><div class="dd">${formatCurrencyFull(offer.total)}</div></div>
+      `;
+    } else if (offer.type === 'Estruturado') {
+      html += `
+        <div class="offer-detail"><div class="dt">Caucao</div><div class="dd">${formatCurrency(offer.downValue)} (${offer.downPct}%)</div></div>
+        <div class="offer-detail"><div class="dt">Parcela</div><div class="dd">${offer.installments}x ${formatCurrencyFull(offer.installmentValue)}</div></div>
+        <div class="offer-detail"><div class="dt">1a Parcela em</div><div class="dd" style="color:var(--blue)">60 dias</div></div>
+      `;
+    } else {
+      const interest = offer.total - amount;
+      html += `
+        <div class="offer-detail"><div class="dt">Parcela</div><div class="dd">${offer.installments}x ${formatCurrencyFull(offer.installmentValue)}</div></div>
+        <div class="offer-detail"><div class="dt">Entrada</div><div class="dd">${offer.downPct > 0 ? formatCurrency(offer.downValue) + ' (' + offer.downPct + '%)' : 'Sem entrada'}</div></div>
+        <div class="offer-detail"><div class="dt">Total</div><div class="dd${interest > 1 ? ' red' : ''}">${formatCurrencyFull(offer.total)}${interest > 1 ? ' (+' + formatCurrency(interest) + ')' : ''}</div></div>
+      `;
+    }
+    html += `</div>`;
+
+    // Flags
+    const flags = [];
+    if (offer.rate > 0) flags.push({ class: 'warn', text: 'Juros: ' + offer.rate + '% a.m.' });
+    if (offer.isStructured) {
+      flags.push({ class: 'info', text: 'Inicio diferido: 60 dias' });
+      flags.push({ class: 'warn', text: 'Cheque caucao obrigatorio' });
+      flags.push({ class: 'warn', text: 'Promissoria digital obrigatoria' });
+    }
+    if (offer.overrides?.recompra) flags.push({ class: 'ok', text: 'Recompra: +2 parcelas' });
+    if (offer.overrides?.campanha) flags.push({ class: 'info', text: 'Campanha: +3 parcelas, -10pp entrada' });
+    if (offer.overrides?.field) flags.push({ class: 'info', text: 'Field: +2 parcelas' });
+
+    if (flags.length) {
+      html += `<div class="offer-flags">`;
+      for (const f of flags) html += `<span class="flag ${f.class}">${f.text}</span>`;
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  // Smart Exits — sugestoes inteligentes quando deal excede limite
+  if (ctx.smartExits && ctx.smartExits.length > 0) {
+    html += `<div style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(59,130,246,0.06));border:2px solid var(--accent);border-radius:var(--radius);padding:20px;margin-top:16px">`;
+    html += `<div style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--accent)">&#128161; Saida Inteligente</div>`;
+    html += `<div style="font-size:12px;color:var(--text-2);margin-bottom:14px">O deal excede o limite da faixa. Em vez de bloquear, o motor sugere alternativas:</div>`;
+    for (const exit of ctx.smartExits) {
+      html += `<div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;border:1px solid var(--border-subtle)">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">${exit.icon} ${exit.title}</div>
+        <div style="font-size:12px;color:var(--text-2)">${exit.desc}</div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Restrictions
+  html += `<div class="restrictions-card">
+    <div class="restrictions-title">Restricoes & Aprovacoes</div>`;
+
+  const r = rule.restrictions;
+  html += `<div class="restriction-row"><span class="label">Contrato</span><span class="value">${r.contract ? 'Obrigatorio' : 'Opcional'}</span></div>`;
+  html += `<div class="restriction-row"><span class="label">Nota promissoria</span><span class="value">${r.promissory ? 'Obrigatoria' : 'Nao necessaria'}</span></div>`;
+  html += `<div class="restriction-row"><span class="label">Limite de credito</span><span class="value${ctx.overLimit ? ' style="color:var(--red)"' : ''}">${formatCurrency(r.creditMax)}${ctx.overLimit ? ' (EXCEDIDO)' : ''}</span></div>`;
+
+  if (r.managerAbove !== null) {
+    html += `<div class="restriction-row"><span class="label">Aprovacao gerente</span><span class="value" style="color:${ctx.needsManager ? 'var(--orange)' : 'var(--green)'}">${r.managerAbove === 0 ? 'Sempre obrigatoria' : 'Acima de ' + formatCurrency(r.managerAbove)}${ctx.needsManager ? ' — NECESSARIA' : ''}</span></div>`;
+  } else {
+    html += `<div class="restriction-row"><span class="label">Aprovacao gerente</span><span class="value" style="color:var(--green)">Nao necessaria</span></div>`;
+  }
+
+  if (r.directorAbove !== null) {
+    html += `<div class="restriction-row"><span class="label">Aprovacao diretoria</span><span class="value" style="color:${ctx.needsDirector ? 'var(--red)' : 'var(--green)'}">${r.directorAbove === 0 ? 'Sempre obrigatoria' : 'Acima de ' + formatCurrency(r.directorAbove)}${ctx.needsDirector ? ' — NECESSARIA' : ''}</span></div>`;
+  } else {
+    html += `<div class="restriction-row"><span class="label">Aprovacao diretoria</span><span class="value" style="color:var(--green)">Nao necessaria</span></div>`;
+  }
+
+  html += `</div>`;
+
+  // Comparison table
+  html += `<div class="comparison" style="margin-top:16px">
+    <table>
+      <thead><tr>
+        <th>Opcao</th>
+        <th>Parcela</th>
+        <th>Entrada</th>
+        <th>Total Pago</th>
+        <th>vs Face</th>
+      </tr></thead>
+      <tbody>`;
+
+  for (const o of offers) {
+    const diff = o.total - amount;
+    const diffPct = ((diff / amount) * 100).toFixed(1);
+    const diffClass = diff < -1 ? 'saving' : diff > 1 ? 'cost' : 'highlight';
+    const diffLabel = diff < -1 ? formatCurrency(Math.abs(diff)) + ' economia' : diff > 1 ? '+' + formatCurrency(diff) + ' juros' : 'Valor face';
+
+    const parcTxt = o.type === 'Pix' ? 'A vista' : o.type === 'Boleto' ? '2 parcelas' : o.type === 'Estruturado' ? o.installments + 'x (60d)' : o.installments + 'x ' + formatCurrencyFull(o.installmentValue);
+    const downTxt = (o.downPct > 0 && o.type !== 'Pix') ? formatCurrency(o.downValue) + (o.type === 'Estruturado' ? ' (caucao)' : '') : '-';
+    html += `<tr>
+      <td><strong>${o.type}</strong>${o.recommended ? ' *' : ''}</td>
+      <td>${parcTxt}</td>
+      <td>${downTxt}</td>
+      <td><strong>${formatCurrencyFull(o.total)}</strong></td>
+      <td class="${diffClass}">${diffLabel}</td>
+    </tr>`;
+  }
+
+  html += `</tbody></table></div>`;
+
+  document.getElementById('results').innerHTML = html;
+}
+
+// Initial simulation
+simulate();
+</script>
+</body>
+</html>
